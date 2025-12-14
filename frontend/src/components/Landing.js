@@ -131,6 +131,7 @@ export default function Landing() {
               href="#get-started"
             >Request a demo</a>
             <a style={styles.secondaryBtn} href="#learn-more">Learn more</a>
+            <a style={{ ...styles.primaryBtn, marginLeft: 8 }} href="#/hospital-bed">Bed Forecasting</a>
           </div>
 
           <div style={styles.features} id="features">
