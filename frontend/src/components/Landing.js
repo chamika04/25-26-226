@@ -104,7 +104,7 @@ export default function Landing() {
   return (
     <div style={styles.page}>
       <header style={styles.header}>
-        <a style={styles.brand} href="#">
+        <a style={styles.brand} href="/">
           <div style={styles.logo} />
           <div>
             <div style={styles.brandTitle}>Hospital Resource Optimization</div>
@@ -225,13 +225,13 @@ export default function Landing() {
             <div style={styles.cardTitle}>Starter</div>
             <div style={{ fontSize: 20, fontWeight: 800, margin: '8px 0' }}>$0</div>
             <div style={{ fontSize: 14, color: 'rgba(6,38,58,0.7)' }}>Basic monitoring and weekly forecasts.</div>
-            <a onMouseEnter={() => setHoverPrimary(true)} onMouseLeave={() => setHoverPrimary(false)} style={{ marginTop: 12, display: 'inline-block', ...styles.primaryBtn }} href="#">Get started</a>
+            <a onMouseEnter={() => setHoverPrimary(true)} onMouseLeave={() => setHoverPrimary(false)} style={{ marginTop: 12, display: 'inline-block', ...styles.primaryBtn }} href="#get-started">Get started</a>
           </div>
           <div style={{ ...styles.card, flex: '1 1 200px', background: '#fff' }}>
             <div style={styles.cardTitle}>Pro</div>
             <div style={{ fontSize: 20, fontWeight: 800, margin: '8px 0' }}>$499/mo</div>
             <div style={{ fontSize: 14, color: 'rgba(6,38,58,0.7)' }}>Advanced forecasting, integrations, and alerts.</div>
-            <a onMouseEnter={() => setHoverPrimary(true)} onMouseLeave={() => setHoverPrimary(false)} style={{ marginTop: 12, display: 'inline-block', ...styles.primaryBtn }} href="#">Request demo</a>
+            <a onMouseEnter={() => setHoverPrimary(true)} onMouseLeave={() => setHoverPrimary(false)} style={{ marginTop: 12, display: 'inline-block', ...styles.primaryBtn }} href="#get-started">Request demo</a>
           </div>
           <div style={{ ...styles.card, flex: '1 1 200px', background: '#fff' }}>
             <div style={styles.cardTitle}>Enterprise</div>
@@ -276,7 +276,7 @@ export default function Landing() {
       </section>
 
       <footer style={styles.footer}>
-        © {new Date().getFullYear()} Hospital Resource Optimization — Built with clarity and care. • <a href="#" style={{ color: 'rgba(255,255,255,0.6)', textDecoration: 'none' }}>Privacy</a>
+        © {new Date().getFullYear()} Hospital Resource Optimization — Built with clarity and care. • <a href="/privacy" style={{ color: 'rgba(255,255,255,0.6)', textDecoration: 'none' }}>Privacy</a>
       </footer>
     </div>
   );
