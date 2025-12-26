@@ -1,0 +1,63 @@
+.swiper {
+  margin: 100px auto;
+  width: 100%; /* Adjusted to fit the container to its parent */
+  height: auto; /* Removed fixed height to accommodate varying image heights */
+}
+
+.swiper-slide {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  font-weight: bold;
+  color: #fff;
+  width: 100%; /* Adjusted to fit the slide to the container */
+}
+
+.swiper-slide img {
+  max-width: 100%; /* Ensures images fit within their slide */
+  max-height: 100%; /* Ensures images fit within their slide */
+  object-fit: cover; /* Ensures images cover the entire slide */
+}
+.black-text {
+  color: black;
+}
+.banner .swiper-slide:nth-child(1n) {
+  background-image:url('public/img/logo.png');
+}
+
+.banner .swiper-slide:nth-child(2n) {
+  background-image:url('public/img/img1.png');
+}
+
+.banner .swiper-slide:nth-child(3n) {
+  background-image:url('public/img/img2.png');
+}
+
+.banner .swiper-slide:nth-child(4n) {
+  background-image:url('public/img/img3.png');
+}
+
+.banner .swiper-slide:nth-child(5n) {
+  background-image:url('public/img/img4.png');
+}
+
+.banner .swiper {
+  margin: 300px auto;
+  width: 373px;
+  height: 330px;
+  overflow: hidden; /* Ensures images don't overflow the frame */
+}
+
+.banner .swiper-slide {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%; /* Ensure slides take up full width of frame */
+}
+
+.banner .swiper-slide img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: cover; /* Ensures images cover the entire slide */
+}
