@@ -13,14 +13,9 @@ const Footer = () => {
     { name: 'Cookie Policy', path: '/cookies' },
   ];
 
+  // ensure footer spans full width (no left margin)
   const footerStyles = `
-    .site-footer { 
-      margin-left: 280px; 
-      transition: margin-left 0.25s ease; 
-    }
-    @media (max-width: 900px) {
-      .site-footer { margin-left: 0; }
-    }
+    .site-footer { margin-left: 0 !important; }
   `;
 
   return (

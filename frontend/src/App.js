@@ -9,7 +9,11 @@ function App() {
   return (
     <div className='min-h-screen'>
       <Navbar />
-      <Outlet />
+
+      <div className='app-container'>
+        <Outlet />
+      </div>
+
       <Footer />
     </div>
   )
