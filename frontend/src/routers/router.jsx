@@ -18,6 +18,7 @@ import Optimization from "../components/Bed_demand_focasting/Optimization";
 import DailyInput from "../components/Bed_demand_focasting/DailyInput";
 import Trends from "../components/Bed_demand_focasting/Trends";
 import Inventory from "../components/Bed_demand_focasting/Inventory";
+import IllnessForecast from "../components/Illness _forecasting/IllnessForecast";
 
 import DashboardLayout from "../dashboard/DashboardLayout";
 import Dashboard from "../dashboard/Dashboard";
@@ -45,6 +46,8 @@ const router = createBrowserRouter([
       { path: "/DailyInput", element: <DailyInput /> },
       { path: "/Trends", element: <Trends /> },
       { path: "/Inventory", element: <Inventory /> },
+      { path: "/illness", element: <IllnessForecast /> },
+      { path: "/IllnessForecast", element: <IllnessForecast /> },
     ],
   },
   {

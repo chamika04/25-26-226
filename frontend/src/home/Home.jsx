@@ -146,6 +146,59 @@ export default function Home() {
                 Threshold-based alerts and scenario planning tools to proactively manage capacity constraints.
               </p>
             </div>
+            <div style={{ 
+              background: '#fff', 
+              padding: 24, 
+              borderRadius: 12, 
+              boxShadow: '0 4px 12px rgba(0,0,0,0.04)',
+              border: '1px solid #f1f5f9',
+              transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'translateY(-4px)';
+              e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.08)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.04)';
+            }}
+            >
+              <div>
+                <h3 style={{ 
+                  margin: '0 0 12px', 
+                  fontSize: '1.25rem',
+                  color: '#0f172a'
+                }}>
+                  Illness Forecasting
+                </h3>
+                <p style={{ 
+                  margin: 0, 
+                  color: '#475569',
+                  lineHeight: 1.6
+                }}>
+                  Predict outbreak trends and illness incidence to steer preventive actions and resource planning.
+                </p>
+              </div>
+              <div style={{marginTop:16, display:'flex', justifyContent:'flex-end'}}>
+                <button
+                  onClick={() => navigate('/IllnessForecast')}
+                  style={{
+                    background: '#ff7a2d',
+                    color: '#fff',
+                    border: 'none',
+                    padding: '10px 16px',
+                    borderRadius: 8,
+                    cursor: 'pointer',
+                    fontWeight: 700
+                  }}
+                >
+                  Open →
+                </button>
+              </div>
+            </div>
           </div>
         </section>
 
