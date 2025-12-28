@@ -2,17 +2,12 @@
   text-align: center;
 }
 
-/* Global reset & typography */
+/* Global page background to avoid white gaps around full-bleed sections */
 html, body, #root {
   height: 100%;
-}
-body {
   margin: 0;
-  font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  background: #ffffff;
-  color: #06263a;
+  padding: 0;
+  background-color: #0f172a;
 }
 
 .App-logo {
@@ -48,4 +43,133 @@ body {
   to {
     transform: rotate(360deg);
   }
+}
+
+/* Small utility to mimic Tailwind's `min-h-screen` used in App.jsx */
+.min-h-screen {
+  min-height: 100vh;
+}
+
+:root {
+  --header-height: 64px;
+  --footer-height: 56px;
+}
+
+.app-root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* container that holds page content below fixed header and above fixed footer */
+.app-content {
+  margin-top: var(--header-height);
+  padding: 18px 24px;
+  padding-bottom: calc(var(--footer-height) + 24px);
+  flex: 1 0 auto;
+}
+
+/* Navbar / Header styles to mimic screenshot */
+header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 60;
+  background: rgba(0,0,0,0.95);
+  height: var(--header-height);
+}
+
+nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 100%;
+  padding: 0 24px;
+}
+
+nav .branding {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+nav .branding img {
+  width: 56px;
+  height: auto;
+}
+
+nav ul {
+  display: flex;
+  gap: 36px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  align-items: center;
+}
+
+nav ul li a {
+  color: #ff7a2d; /* orange */
+  text-transform: uppercase;
+  font-weight: 700;
+  text-decoration: none;
+  letter-spacing: 0.04em;
+}
+
+/* right-side controls */
+.login-btn {
+  background: #0891b2; /* bright blue */
+  color: white;
+  padding: 8px 16px;
+  border-radius: 999px;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+}
+
+/* Hero / Banner styles */
+.home-hero {
+  margin-top: 80px; /* make room for fixed header */
+  width: 100%;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: center;
+}
+
+.hero-text {
+  max-width: 720px;
+  padding-left: 48px;
+  color: #fff;
+}
+
+.hero-title {
+  font-size: 48px;
+  font-weight: 800;
+  margin: 0;
+  line-height: 1.02;
+}
+
+.hero-brand {
+  display: block;
+  font-size: 96px;
+  font-weight: 900;
+  color: #ff6a1a;
+  margin: 8px 0 16px 0;
+}
+
+.hero-copy {
+  color: rgba(255,255,255,0.9);
+  max-width: 560px;
+  line-height: 1.6;
+}
+
+/* responsive tweaks */
+@media (max-width: 768px) {
+  nav { padding: 10px 20px; }
+  nav ul { display: none; }
+  .hero-text { padding-left: 20px; }
+  .hero-title { font-size: 28px; }
+  .hero-brand { font-size: 48px; }
 }
