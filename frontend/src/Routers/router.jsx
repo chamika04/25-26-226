@@ -73,6 +73,14 @@ const router = createBrowserRouter([
           path : '/reset',
           element : <Reset></Reset>
       },
+       { path: "/bed-dashboard", element: <BedDashboard /> },
+      { path: "/Sidebar", element: <Sidebar /> },
+      { path: "/Layout", element: <Layout /> },
+      { path: "/Forecast", element: <Forecast /> },
+      { path: "/Optimization", element: <Optimization /> },
+      { path: "/DailyInput", element: <DailyInput /> },
+      { path: "/Trends", element: <Trends /> },
+      { path: "/Inventory", element: <Inventory /> },
       {
         path:"/product/:id",
         element:<SingleProduct/>,
