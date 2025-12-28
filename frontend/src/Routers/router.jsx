@@ -1,79 +1,43 @@
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { createBrowserRouter } from "react-router-dom";
 import axios from "axios";
+
 import App from "../App";
-import Home from "../Pages/Home";
-import Shop from "../Pages/Medicine/Shop";
+import Home from "../home/Home";
 import About from "../components/About";
+import Username from "../components/Username";
+import Password from "../components/Password";
+import Register from "../components/Register";
+import Profile from "../components/Profile";
+import Recovery from "../components/Recovery";
+import Reset from "../components/Reset";
+import BedDashboard from "../components/Bed_demand_focasting/Bed_Dashboard";
+import Sidebar from "../components/Bed_demand_focasting/Sidebar";
+import Layout from "../components/Bed_demand_focasting/Layout";
+import Forecast from "../components/Bed_demand_focasting/Forecast";
+import Optimization from "../components/Bed_demand_focasting/Optimization";
+import DailyInput from "../components/Bed_demand_focasting/DailyInput";
+import Trends from "../components/Bed_demand_focasting/Trends";
+import Inventory from "../components/Bed_demand_focasting/Inventory";
 
-import SingleProduct from "../Pages/Medicine/SingleProduct";
-import DashboardLayout from "../Pages/Medicine/DashBoard/DashboardLayout";
-import Dashboard from "../Pages/Medicine/DashBoard/Dashboard";
-import UploadProduct from "../Pages/Medicine/DashBoard/UploadProduct";
-import EditProduct from "../Pages/Medicine/DashBoard/EditProduct";
-import ManageMed from "../Pages/Medicine/DashBoard/ManageMed";
-import ManageEquip from"../Pages/Medicine/DashBoard/ManageEquip";
-import Card from "../Pages/Medicine/Card";
-import Forecast from "../Pages/Medicine/Forecast";
-
-import Username from "../Pages/Login/Username";
-import Password from "../Pages/Login/Password";
-import Register from "../Pages/Login/Register";
-import Admin from "../Pages/Admin/Admin";
-import Profile from "../Pages/Login/Profile";
-import Recovery from "../Pages/Login/Recovery";
-import Reset from "../Pages/Login/Reset";
-import ShowP4Shop from "../Pages/Medicine/ShowP4Shop";
-
+import DashboardLayout from "../dashboard/DashboardLayout";
+import Dashboard from "../dashboard/Dashboard";
+import UploadProduct from "../dashboard/UploadProduct";
+import ManageProduct from "../dashboard/ManageProduct";
+import EditProduct from "../dashboard/EditProduct";
 const router = createBrowserRouter([
   {
     path: "/",
     element: <App />,
     children: [
-      {
-        path: "/",
-        element: <Home />,
-      },
-      {
-        path: "/shop",
-        element: <Shop/>,
-      },
-      {
-        path: "/about",
-        element: <About/>
-      },
-      {
-        path: "/showP4Shop",
-        element: <ShowP4Shop />, 
-      },
-      {
-        path: "/card",
-        element: <Card/>,
-      }, 
-      {
-        path: "/login",
-        element: <Username />,
-      },
-      {
-          path : '/password',
-          element : <Password/>
-      },
-      {
-          path : '/register',
-          element : <Register></Register>
-       },
-      {
-          path : '/profile',
-          element : <Profile></Profile>
-      },
-      {
-          path : '/recovery',
-          element : <Recovery></Recovery>
-      },
-      {
-          path : '/reset',
-          element : <Reset></Reset>
-      },
-       { path: "/bed-dashboard", element: <BedDashboard /> },
+      { index: true, element: <Home /> },
+      { path: "/about", element: <About /> },
+      { path: "/login", element: <Username /> },
+      { path: "/password", element: <Password /> },
+      { path: "/register", element: <Register /> },
+      { path: "/profile", element: <Profile /> },
+      { path: "/recovery", element: <Recovery /> },
+      { path: "/reset", element: <Reset /> },
+      { path: "/bed-dashboard", element: <BedDashboard /> },
       { path: "/Sidebar", element: <Sidebar /> },
       { path: "/Layout", element: <Layout /> },
       { path: "/Forecast", element: <Forecast /> },
@@ -81,64 +45,25 @@ const router = createBrowserRouter([
       { path: "/DailyInput", element: <DailyInput /> },
       { path: "/Trends", element: <Trends /> },
       { path: "/Inventory", element: <Inventory /> },
-      {
-        path:"/product/:id",
-        element:<SingleProduct/>,
-        loader:({params})=>fetch(`http://localhost:5000/product/${params.id}`)
-      }
-      
     ],
   },
-  
-
-  
-  
-  
   {
-    path:"/medicine/dashboard",
-    element:<DashboardLayout/>,
-    children:[
+    path: "/admin/dashboard",
+    element: <DashboardLayout />,
+    children: [
+      { index: true, element: <Dashboard /> },
+      { path: "upload", element: <UploadProduct /> },
+      { path: "manage", element: <ManageProduct /> },
       {
-        path:"/medicine/dashboard",
-        element:<Dashboard/>
-      }, 
-      {
-        path:"/medicine/dashboard/upload",
-        element:<UploadProduct/>
-      },
-      {
-        path:"/medicine/dashboard/manage",
-        element:<ManageMed/>
-      },
-      {
-        path:"/medicine/dashboard/manage_eqp",
-        element:<ManageEquip/>
-      },
-      {
-        path:"/medicine/dashboard/forecast",
-        element:<Forecast/>
-      },
-      {
-        path:"/medicine/dashboard/edit/:id",
-        element:<EditProduct/>,
+        path: "edit/:id",
+        element: <EditProduct />,
         loader: ({ params }) =>
-        axios.get(`http://localhost:8070/product/get/${params.id}`)
-        .then(response => response.data)
-      }
-    ]
+          axios
+            .get(`http://localhost:8070/product/get/${params.id}`)
+            .then((response) => response.data),
+      },
+    ],
   },
-
-  {
-    path:"/admin",
-    element:<Admin/>,
-    children:[
-      {
-        path : '/admin/users',
-        element : <Admin></Admin>
-      } 
-    ]
-  }
- 
 ]);
 
 export default router;

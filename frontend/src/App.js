@@ -1,12 +1,18 @@
-import './App.css';
-import Landing from './components/Landing';
+
+import './App.css'
+import { Outlet } from 'react-router-dom'
+import Navbar from './components/Navbar/Navbar'
+import Footer from './components/Footer/Footer'
+
 
 function App() {
   return (
-    <div className="App">
-      <Landing />
+    <div className='min-h-screen'>
+      <Navbar />
+      <Outlet />
+      <Footer />
     </div>
-  );
+  )
 }
 
-export default App;
+export default App
