@@ -8,7 +8,7 @@ import convertToBase64 from '../helper/convert';
 import { registerUser } from '../helper/helper';
 import Navbar from '../components/Navbar';
 import { ReactTyped } from 'react-typed';
-import styles from '../styles/Username.module.css';
+import styles from '../Styles/Username.module.css';
 
 export default function Register() {
   const navigate = useNavigate();
