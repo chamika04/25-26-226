@@ -44,7 +44,8 @@ export async function registerUser(credentials){
 
         /** send email */
         if(status === 201){
-            await axios.post('/api/registerMail', { username, userEmail : email, text : msg})
+            const text = `Welcome ${username}, thank you for registering.`;
+            await axios.post('/api/registerMail', { username, userEmail : email, text })
         }
 
         return toast.success("Register successfully..!");
@@ -120,9 +121,9 @@ export async function resetPassword({ username, password }){
 export async function getUsers(){
     try {
         const { data } = await axios.get(`/api/user/getUsers`);
-        return ( users => setUsers(users.data) )
+        return { data };
     } catch (error) {
-        return (err => console.log(err))
+        return { error };
     }
 }
 
