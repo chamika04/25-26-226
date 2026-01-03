@@ -27,11 +27,11 @@ import ETU_HeadDashboard from "../Pages/ETU_Head/ETU-HeadDashboard";
 import ETU_DocDashboard from "../Pages/ETU_Doctor/ETU-DocDashboard";
 import ETU_DocLayout from "../Pages/ETU_Doctor/ETU-DocLayout";
 
-import ETU_NurseDashboard from "../Pages/ETU_Nurse/ETU-NurseDashboard";
-import ETU_NurseLayout from "../Pages/ETU_Nurse/ETU-NurseLayout";
+import ETU_NurseDashboard from "../Pages/ETU_Nurse/ETU_NurseDashboard";
+import ETU_NurseLayout from "../Pages/ETU_Nurse/ETU_NurseLayout";
 
-import OPD_DocDashboard from "../Pages/OPD_Doctor/OPD-DocDashboard";
-import OPD_DocLayout from "../Pages/OPD_Doctor/OPD-DocLayout";
+import OPD_DocDashboard from "../Pages/OPD_Doctor/OPD_DocDashboard";
+import OPD_DocLayout from "../Pages/OPD_Doctor/OPD_DocLayout";
 
 import PharmacistDashboard from "../Pages/Pharmacist/PharmacistDashboard";
 import PharmacistLayout from "../Pages/Pharmacist/PharmacistLayout";

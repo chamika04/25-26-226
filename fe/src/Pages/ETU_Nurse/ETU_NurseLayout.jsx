@@ -1,6 +1,6 @@
 import React from 'react';
 import { Outlet } from 'react-router-dom';
-import BedSidebar from './ETU_DocSidebar';
+import BedSidebar from './ETU_NurseSidebar';
 
 const ETU_NurseLayout = () => {
   return (
