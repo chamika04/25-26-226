@@ -1,8 +1,8 @@
 import React from 'react';
 import { Outlet } from 'react-router-dom';
-import BedSidebar from './ETU_HeadSidebar';
+import BedSidebar from './PharmacistSidebar';
 
-const ETU_HeadLayout = () => {
+const PharmacistLayout = () => {
   return (
     <div className="flex h-screen overflow-hidden">
       {/* Fixed Sidebar */}
@@ -18,4 +18,4 @@ const ETU_HeadLayout = () => {
   );
 };
 
-export default ETU_HeadLayout;
+export default PharmacistLayout;

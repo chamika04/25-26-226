@@ -6,6 +6,13 @@ import About from "../components/About";
 import MainLayout from "../components/MainLayout";
 import AuthLayout from "../components/AuthLayout"; 
 
+import RegReq from "../Pages/Admin/Register_Requests";
+import Login from "../Pages/Login/Username";
+import RegisterForm from "../Pages/Login/Register";
+import Admin from "../Pages/Admin/Admin";
+import AdminLayout from "../Pages/Admin/Layout";
+import AdminDashboard from "../Pages/Admin/AdminDashboard";
+
 import DashboardLayout from "../Pages/Medicine/DashBoard/DashboardLayout";
 import Dashboard from "../Pages/Medicine/DashBoard/Dashboard";
 import UploadProduct from "../Pages/Medicine/DashBoard/UploadProduct";
@@ -14,16 +21,26 @@ import ManageMed from "../Pages/Medicine/DashBoard/ManageMed";
 import ManageEquip from"../Pages/Medicine/DashBoard/ManageEquip";
 
 import Forecast from "../Pages/ETU_Head/Forecast";
-import DashBedLayout from "../Pages/ETU_Head/ETU-HeadLayout";
-import Dashboard_Bed from "../Pages/ETU_Head/ETU-HeadDashboard";
+import ETU_HeadLayout from "../Pages/ETU_Head/ETU-HeadLayout";
+import ETU_HeadDashboard from "../Pages/ETU_Head/ETU-HeadDashboard";
 
-import RegReq from "../Pages/Admin/Register_Requests";
-import Login from "../Pages/Login/Username";
-import RegisterForm from "../Pages/Login/Register";
-import Admin from "../Pages/Admin/Admin";
-import AdminLayout from "../Pages/Admin/Layout";
-import AdminDashboard from "../Pages/Admin/AdminDashboard";
+import ETU_DocDashboard from "../Pages/ETU_Doctor/ETU-DocDashboard";
+import ETU_DocLayout from "../Pages/ETU_Doctor/ETU-DocLayout";
 
+import ETU_NurseDashboard from "../Pages/ETU_Nurse/ETU-NurseDashboard";
+import ETU_NurseLayout from "../Pages/ETU_Nurse/ETU-NurseLayout";
+
+import OPD_DocDashboard from "../Pages/OPD_Doctor/OPD-DocDashboard";
+import OPD_DocLayout from "../Pages/OPD_Doctor/OPD-DocLayout";
+
+import PharmacistDashboard from "../Pages/Pharmacist/PharmacistDashboard";
+import PharmacistLayout from "../Pages/Pharmacist/PharmacistLayout";
+
+import StoreManagerDashboard from "../Pages/Store_Manager/StoreManagerDashboard";
+import StoreManagerLayout from "../Pages/Store_Manager/StoreManagerLayout";
+
+import WardNurseDashboard from "../Pages/Ward_Nurse/WardNurseDashboard";
+import WardNurseLayout from "../Pages/Ward_Nurse/WardNurseLayout";    
 
 
 const router = createBrowserRouter([
@@ -50,73 +67,64 @@ const router = createBrowserRouter([
 
   {
     path:"/ETU_Head/dashboard",
-    element:<DashBedLayout/>,
+    element:<ETU_HeadLayout/>,
     children:[
       { path:"/ETU_Head/dashboard/forecast", element:<Forecast/> },
-      { path:"/ETU_Head/dashboard/dashboard", element:<Dashboard_Bed/> },
+      { path:"/ETU_Head/dashboard/dashboard", element:<ETU_HeadDashboard/> },
       
     ]
   },
 
-  
-  {
-    path:"/Doctor/dashboard",
-    element:<DashBedLayout/>,
-    children:[
-      
-      
-    ]
-  },
-    
   {
     path:"/ETU_Doctor/dashboard",
-    element:<DashBedLayout/>,
+    element:<ETU_DocLayout/>,
     children:[
+      { path:"/ETU_Doctor/dashboard/ETU_DocDashboard", element:<ETU_DocDashboard/> },
       
     ]
   },
 
   {
     path:"/ETU_Nurse/dashboard",
-    element:<DashBedLayout/>,
+    element:<ETU_NurseLayout/>,
     children:[
-      
+      { path:"/ETU_Nurse/dashboard/ETU_NurseDashboard", element:<ETU_NurseDashboard/> },
       
     ]
   },
 
   {
     path:"/OPD_Doctor/dashboard",
-    element:<DashBedLayout/>,
+    element:<OPD_DocLayout/>,
     children:[
-      
+      { path:"/OPD_Doctor/dashboard/OPD_DocDashboard", element:<OPD_DocDashboard/> },
       
     ]
   },
 
   {
     path:"/Pharmacist/dashboard",
-    element:<DashBedLayout/>,
+    element:<PharmacistLayout/>,
     children:[
-      
+      { path:"/Pharmacist/dashboard/PharmacistDashboard", element:<PharmacistDashboard/> },
       
     ]
   },
 
   {
     path:"/Store_Manager/dashboard",
-    element:<DashBedLayout/>,
+    element:<StoreManagerLayout/>,
     children:[
-     
+     { path:"/Store_Manager/dashboard/StoreManagerDashboard", element:<StoreManagerDashboard/> },
       
     ]
   },
 
   {
     path:"/Ward_Nurse/dashboard",
-    element:<DashBedLayout/>,
+    element:<WardNurseLayout/>,
     children:[
-      
+      { path:"/Ward_Nurse/dashboard/WardNurseDashboard", element:<WardNurseDashboard/> },
       
     ]
   },

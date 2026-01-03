@@ -8,7 +8,7 @@ import {
   FaUserInjured
 } from "react-icons/fa";
 
-const ETU_HeadDashboard = () => {
+const WardNurseDashboard = () => {
   return (
     <div className="w-full min-h-screen bg-blue-100 p-6 mt-20">
 
@@ -125,4 +125,4 @@ const ETU_HeadDashboard = () => {
   );
 };
 
-export default ETU_HeadDashboard;
+export default WardNurseDashboard;
