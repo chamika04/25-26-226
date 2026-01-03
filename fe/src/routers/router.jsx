@@ -14,7 +14,6 @@ import ManageMed from "../Pages/Medicine/DashBoard/ManageMed";
 import ManageEquip from"../Pages/Medicine/DashBoard/ManageEquip";
 
 import Forecast from "../Pages/ETU_Head/Forecast";
-
 import DashBedLayout from "../Pages/ETU_Head/ETU-HeadLayout";
 import Dashboard_Bed from "../Pages/ETU_Head/ETU-HeadDashboard";
 
@@ -59,11 +58,12 @@ const router = createBrowserRouter([
     ]
   },
 
+  
   {
     path:"/Doctor/dashboard",
     element:<DashBedLayout/>,
     children:[
-      { path:"/ETU_Head/dashboard/forecast", element:<Forecast/> },
+      
       
     ]
   },
@@ -72,7 +72,6 @@ const router = createBrowserRouter([
     path:"/ETU_Doctor/dashboard",
     element:<DashBedLayout/>,
     children:[
-      { path:"/ETU_Head/dashboard/forecast", element:<Forecast/> },
       
     ]
   },
@@ -81,7 +80,7 @@ const router = createBrowserRouter([
     path:"/ETU_Nurse/dashboard",
     element:<DashBedLayout/>,
     children:[
-      { path:"/ETU_Head/dashboard/forecast", element:<Forecast/> },
+      
       
     ]
   },
@@ -90,7 +89,7 @@ const router = createBrowserRouter([
     path:"/OPD_Doctor/dashboard",
     element:<DashBedLayout/>,
     children:[
-      { path:"/ETU_Head/dashboard/forecast", element:<Forecast/> },
+      
       
     ]
   },
@@ -99,7 +98,7 @@ const router = createBrowserRouter([
     path:"/Pharmacist/dashboard",
     element:<DashBedLayout/>,
     children:[
-      { path:"/ETU_Head/dashboard/forecast", element:<Forecast/> },
+      
       
     ]
   },
@@ -108,7 +107,7 @@ const router = createBrowserRouter([
     path:"/Store_Manager/dashboard",
     element:<DashBedLayout/>,
     children:[
-      { path:"/ETU_Head/dashboard/forecast", element:<Forecast/> },
+     
       
     ]
   },
@@ -117,7 +116,7 @@ const router = createBrowserRouter([
     path:"/Ward_Nurse/dashboard",
     element:<DashBedLayout/>,
     children:[
-      { path:"/ETU_Head/dashboard/forecast", element:<Forecast/> },
+      
       
     ]
   },
