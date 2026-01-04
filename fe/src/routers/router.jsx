@@ -31,12 +31,19 @@ import Equipment from "../Pages/ETU_Nurse/Equipment";
 
 import OPD_DocDashboard from "../Pages/OPD_Doctor/OPD_DocDashboard";
 import OPD_DocLayout from "../Pages/OPD_Doctor/OPD_DocLayout";
+
 import DocAvailability from "../Pages/Patient/DocAvailability";
 import DocProfile from "../Pages/Patient/DocProfile";
+import Dashboard_patient from "../Pages/Patient/Dashboard_patient";
 
 import PharmacistDashboard from "../Pages/Pharmacist/PharmacistDashboard";
 import PharmacistLayout from "../Pages/Pharmacist/PharmacistLayout";
 import PharmacistGraphs from "../Pages/Pharmacist/PharmacistGraphs";
+import Prescriptions from "../Pages/Pharmacist/Prescriptions";
+import Dispense from "../Pages/Pharmacist/Dispense";
+import InventoryRequests from "../Pages/Pharmacist/Inventory_Req";
+import MedicineAnalytics from "../Pages/Pharmacist/Analytics";
+import EquipmentInventory from "../Pages/Pharmacist/Equipment";
 
 import StoreManagerDashboard from "../Pages/Store_Manager/StoreManagerDashboard";
 import StoreManagerLayout from "../Pages/Store_Manager/StoreManagerLayout";
@@ -64,6 +71,10 @@ const router = createBrowserRouter([
     children: [
       { path: "/", element: <Home />},
       { path: "/about", element: <About/> },
+      { path:"/dashboard_patient", element:<Dashboard_patient/> },
+      { path:"/docAvailability", element:<DocAvailability/> },
+      { path:"/docProfile", element:<DocProfile/> },
+
       /*{ path:"/product/:id", element:<SingleProduct/>,
         loader:({params})=>fetch(`http://localhost:5000/product/${params.id}`)
       }*/
@@ -109,8 +120,7 @@ const router = createBrowserRouter([
     element:<OPD_DocLayout/>,
     children:[
       { path:"/OPD_Doctor/dashboard/OPD_DocDashboard", element:<OPD_DocDashboard/> },
-      { path:"/OPD_Doctor/dashboard/docAvailability", element:<DocAvailability/> },
-      { path:"/OPD_Doctor/dashboard/docProfile", element:<DocProfile/> },
+      
     ]
   },
 
@@ -120,7 +130,11 @@ const router = createBrowserRouter([
     children:[
       { path:"/Pharmacist/dashboard/PharmacistDashboard", element:<PharmacistDashboard/> },
       { path:"/Pharmacist/dashboard/PharmacistGraphs", element:<PharmacistGraphs/> },
-      
+      { path:"/Pharmacist/dashboard/prescriptions", element:<Prescriptions/> },
+      { path:"/Pharmacist/dashboard/dispense", element:<Dispense/> },
+      { path:"/Pharmacist/dashboard/inventory-requests", element:<InventoryRequests/> },
+      { path:"/Pharmacist/dashboard/analytics", element:<MedicineAnalytics/> },
+      { path:"/Pharmacist/dashboard/equipment", element:<EquipmentInventory/> },
     ]
   },
 
