@@ -64,7 +64,8 @@ import Alerts from "../Pages/Store_Manager/Alerts";
 import InventoryReqStore from "../Pages/Store_Manager/Inventory_Requests";
 
 import WardNurseDashboard from "../Pages/Ward_Nurse/WardNurseDashboard";
-import WardNurseLayout from "../Pages/Ward_Nurse/WardNurseLayout";    
+import WardNurseLayout from "../Pages/Ward_Nurse/WardNurseLayout";  
+import WardNurseDailyInput from "../Pages/Ward_Nurse/WardNurseDailyInput";/////  
 
 import MethaRoleLayout from "../Pages/MethaRole/MethaRoleLayout";
 import MethaRoleDashboard from "../Pages/MethaRole/MethaRoleDashboard";
@@ -191,10 +192,11 @@ const router = createBrowserRouter([
   },
 
   {
-    path:"/Metha/dashboard",
-    element:<MethaRoleLayout/>,
+    path:"/Ward_Nurse/dashboard",
+    element:<WardNurseLayout/>,
     children:[
-      { path:"/Metha/dashboard/MethaRoleDashboard", element:<MethaRoleDashboard/> },
+      { path:"/Ward_Nurse/dashboard/WardNurseDashboard", element:<WardNurseDashboard/> },///////
+      { path:"/Ward_Nurse/dashboard/WardNurseDailyInput", element:<WardNurseDailyInput/> }/////
       
     ]
   },
