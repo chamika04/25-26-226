@@ -1,3 +1,4 @@
+import React, { useState, useEffect } from "react";
 import { Sidebar } from "flowbite-react";
 import {
   HiOutlineHome,
@@ -5,12 +6,27 @@ import {
   HiOutlineBeaker,
   HiOutlineClipboardList,
   HiOutlineLogout,
+  HiOutlineChevronDown,
 } from "react-icons/hi";
 import { useNavigate, useLocation } from "react-router-dom";
 
 const ETU_HeadSidebar = () => {
   const navigate = useNavigate();
   const location = useLocation();
+
+  const [bedsOpen, setBedsOpen] = useState(false);
+
+  const bedRoutes = [
+    "/ETU_Head/dashboard/trend",
+    "/ETU_Head/dashboard/forecast",
+    "/ETU_Head/dashboard/optimization",
+  ];
+
+  const isBedsActive = bedRoutes.includes(location.pathname);
+
+  useEffect(() => {
+    if (isBedsActive) setBedsOpen(true);
+  }, [isBedsActive]);
 
   const userLogout = () => {
     localStorage.removeItem("token");
@@ -75,6 +91,53 @@ const ETU_HeadSidebar = () => {
             >
               Doctors
             </Sidebar.Item>
+            {/* Bed Forecasting: collapsible parent with three sub-pages */}
+            <div className="bg-transparent mt-4">
+              <Sidebar.Item
+                onClick={() => setBedsOpen((s) => !s)}
+                icon={HiOutlineChartBar}
+                className={`transition-all duration-200 rounded-lg px-3 py-2 flex items-center gap-2 ${
+                  isBedsActive
+                    ? "bg-blue-200 text-blue-900 font-semibold"
+                    : "text-slate-800 hover:bg-blue-100"
+                }`}
+              >
+                <div className="flex items-center justify-between w-full">
+                  <span>Bed Forecasting</span>
+                  <HiOutlineChevronDown
+                    className={`ml-2 transform transition-transform ${bedsOpen ? "rotate-180" : "rotate-0"}`}
+                  />
+                </div>
+              </Sidebar.Item>
+
+              {bedsOpen && (
+                <div className="pl-6 mt-2 space-y-1">
+                  <Sidebar.Item
+                    onClick={() => navigate("/ETU_Head/dashboard/trend")}
+                    icon={HiOutlineChartBar}
+                    className={itemClass("/ETU_Head/dashboard/trend")}
+                  >
+                    Trend Page
+                  </Sidebar.Item>
+
+                  <Sidebar.Item
+                    onClick={() => navigate("/ETU_Head/dashboard/forecast")}
+                    icon={HiOutlineBeaker}
+                    className={itemClass("/ETU_Head/dashboard/forecast")}
+                  >
+                    Forecast Page
+                  </Sidebar.Item>
+
+                  <Sidebar.Item
+                    onClick={() => navigate("/ETU_Head/dashboard/optimization")}
+                    icon={HiOutlineClipboardList}
+                    className={itemClass("/ETU_Head/dashboard/optimization")}
+                  >
+                    Optimization Page
+                  </Sidebar.Item>
+                </div>
+              )}
+            </div>
           </Sidebar.ItemGroup>
 
           {/* Logout */}
