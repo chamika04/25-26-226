@@ -1,15 +1,14 @@
-import React, { useState } from "react";
-import { Link, useParams } from "react-router-dom";
-import Navbar from "../../components/Navbar";
+import React from "react";
+import { useParams } from "react-router-dom";
 
 export default function DoctorProfile() {
   const { id } = useParams();
 
-  // Preview doctor data
+  // Preview doctor data (replace with API later using id)
   const doctor = {
     name: "Dr. Samadhi Wijethunga",
     specialization: "Cardiology",
-    photo: "https://cdn-icons-png.flaticon.com/512/387/387561.png"
+    photo: "https://cdn-icons-png.flaticon.com/512/387/387561.png",
   };
 
   // Weekly availability (preview)
@@ -23,99 +22,111 @@ export default function DoctorProfile() {
     { day: "Sunday", availability: 20 },
   ];
 
+  const availabilityStyle = (val) => {
+    if (val >= 80) return "bg-green-100 border-green-200 text-green-800";
+    if (val >= 50) return "bg-yellow-100 border-yellow-200 text-yellow-800";
+    return "bg-red-100 border-red-200 text-red-800";
+  };
+
+  const availabilityLabel = (val) => {
+    if (val >= 80) return "High";
+    if (val >= 50) return "Medium";
+    return "Low";
+  };
+
   return (
-    <>
-      <div className="flex min-h-screen bg-gray-100">
-        {/* Sidebar */}
-        <div className="w-64 bg-gray-800 text-white p-6 fixed h-full shadow-lg">
-          <h2 className="text-2xl font-bold mb-20">Doctor Panel</h2>
-          <ul className="space-y-4">
-            <li>
-              <Link
-                to="/doctor-availability"
-                className="block py-2 px-4 rounded hover:bg-gray-700 transition-colors text-lg"
-              >
-                Doctor Availability
-              </Link>
-            </li>
-            <li>
-              <Link
-                to={`/doctor/${id}`}
-                className="block py-2 px-4 rounded bg-gray-700 text-lg"
-              >
-                Doctor Profile
-              </Link>
-            </li>
-          </ul>
-        </div>
-
-        <Navbar />
-
-        {/* Main Content */}
-        <div className="ml-64 flex-1">
-          <div
-            className="bg-cover bg-center bg-no-repeat bg-fixed w-full min-h-screen"
-            style={{
-              backgroundImage:
-                "url('https://wallpapercave.com/wp/wp4655609.jpg')",
-            }}
-          >
-            <div className="bg-black bg-opacity-50 w-full min-h-screen">
-              <div className="container mx-auto px-6 py-12">
-                <div className="pt-20"></div>
-
-                {/* Doctor Card */}
-                <div className="bg-white rounded-lg shadow-lg p-6 mb-10 flex items-center">
-                  <img
-                    src={doctor.photo}
-                    alt="Doctor"
-                    className="w-28 h-28 rounded-full mr-6"
-                  />
-                  <div>
-                    <h1 className="text-3xl font-bold">{doctor.name}</h1>
-                    <p className="text-gray-600 text-lg">
-                      {doctor.specialization}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Weekly Schedule */}
-                <div className="bg-gray-200 rounded-lg p-6">
-                  <h2 className="text-2xl font-bold mb-6 text-center">
-                    Weekly Availability
-                  </h2>
-
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    {weeklySchedule.map((day, index) => (
-                      <div
-                        key={index}
-                        className={`p-4 rounded-lg text-center text-white ${
-                          day.availability >= 80
-                            ? "bg-green-500"
-                            : day.availability >= 50
-                            ? "bg-yellow-500"
-                            : "bg-red-500"
-                        }`}
-                      >
-                        <h3 className="text-xl font-semibold">{day.day}</h3>
-                        <p className="text-lg">{day.availability}% Available</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Book Appointment */}
-                <div className="text-center mt-10">
-                  <button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg text-lg">
-                    Book Appointment
-                  </button>
-                </div>
-
-              </div>
+    <div className="min-h-screen bg-blue-100 px-4 sm:px-6 lg:px-10 pt-6 pb-10">
+      <div className="max-w-5xl mx-auto space-y-6">
+        {/* Header Card */}
+        <div className="bg-white rounded-2xl shadow-md border border-blue-200 p-6 flex flex-col sm:flex-row sm:items-center gap-5">
+          <div className="flex items-center gap-4">
+            <img
+              src={doctor.photo}
+              alt="Doctor"
+              className="w-24 h-24 rounded-2xl bg-blue-50 border border-blue-200 p-2"
+            />
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-bold text-slate-900">
+                {doctor.name}
+              </h1>
+              <p className="text-slate-600 text-base sm:text-lg">
+                {doctor.specialization}
+              </p>
+              <p className="text-xs text-slate-500 mt-1">
+                Profile ID: <span className="font-semibold">{id}</span>
+              </p>
             </div>
           </div>
+
+          <div className="sm:ml-auto flex gap-3 flex-wrap">
+            <span className="px-3 py-1 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-100">
+              OPD / Clinic
+            </span>
+            <span className="px-3 py-1 rounded-full text-xs font-semibold bg-slate-50 text-slate-700 border border-slate-200">
+              Weekly Schedule
+            </span>
+          </div>
+        </div>
+
+        {/* Weekly Availability */}
+        <div className="bg-white rounded-2xl shadow-md border border-blue-200 p-6">
+          <div className="flex items-start justify-between gap-4 flex-wrap mb-4">
+            <div>
+              <h2 className="text-xl font-bold text-slate-900">
+                Weekly Availability
+              </h2>
+              <p className="text-sm text-slate-600">
+                Percent availability preview for each day.
+              </p>
+            </div>
+
+            <div className="text-xs text-slate-600 bg-blue-50 border border-blue-100 px-3 py-1 rounded-full">
+              Sample data (replace with API later)
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {weeklySchedule.map((day, index) => (
+              <div
+                key={index}
+                className={`rounded-2xl border p-4 ${availabilityStyle(day.availability)}`}
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-lg font-bold">{day.day}</h3>
+                  <span className="text-xs font-bold px-2 py-1 rounded-full bg-white/70 border">
+                    {availabilityLabel(day.availability)}
+                  </span>
+                </div>
+
+                <div className="flex items-end justify-between">
+                  <div className="text-3xl font-extrabold">
+                    {day.availability}%
+                  </div>
+                  <div className="text-sm font-semibold">Available</div>
+                </div>
+
+                {/* progress bar */}
+                <div className="w-full bg-white/60 rounded-full h-2 mt-3 overflow-hidden border">
+                  <div
+                    className="h-2 rounded-full"
+                    style={{
+                      width: `${day.availability}%`,
+                      background:
+                        day.availability >= 80
+                          ? "#22c55e"
+                          : day.availability >= 50
+                          ? "#facc15"
+                          : "#ef4444",
+                    }}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+
+          
         </div>
       </div>
-    </>
+    </div>
   );
 }

@@ -53,27 +53,43 @@ const PharmacistSidebar = () => {
             </Sidebar.Item>
 
             <Sidebar.Item
-              onClick={() => navigate("/Pharmacist/dashboard/PharmacistGraphs")}
-              icon={HiOutlineChartBar}
-              className={itemClass("/Pharmacist/dashboard/PharmacistGraphs")}
-            >
-              Forecast
-            </Sidebar.Item>
-
-            <Sidebar.Item
-              onClick={() => navigate("/Pharmacist/dashboard/PharmacistGraphs")}
-              icon={HiOutlineBeaker}
-              className={itemClass("/Pharmacist/dashboard/PharmacistGraphs")}
-            >
-              Medicine
-            </Sidebar.Item>
-
-            <Sidebar.Item
-              onClick={() => navigate("/medicine/dashboard/manage_eqp")}
+              onClick={() => navigate("/Pharmacist/dashboard/prescriptions")}
               icon={HiOutlineClipboardList}
-              className={itemClass("/medicine/dashboard/manage_eqp")}
+              className={itemClass("/Pharmacist/dashboard/prescriptions")}
             >
-              Equipments
+              Prescriptions
+            </Sidebar.Item>
+
+            <Sidebar.Item
+              onClick={() => navigate("/Pharmacist/dashboard/dispense")}
+              icon={HiOutlineBeaker}
+              className={itemClass("/Pharmacist/dashboard/dispense")}
+            >
+              Dispense
+            </Sidebar.Item>
+
+            <Sidebar.Item
+              onClick={() => navigate("/Pharmacist/dashboard/inventory-requests")}
+              icon={HiOutlineClipboardList}
+              className={itemClass("/Pharmacist/dashboard/inventory-requests")}
+            >
+              Inventory Requests
+            </Sidebar.Item>
+
+            <Sidebar.Item
+              onClick={() => navigate("/Pharmacist/dashboard/analytics")}
+              icon={HiOutlineChartBar}
+              className={itemClass("/Pharmacist/dashboard/analytics")}
+            >
+              Analytics
+            </Sidebar.Item>
+
+            <Sidebar.Item
+              onClick={() => navigate("/Pharmacist/dashboard/equipment")}
+              icon={HiOutlineClipboardList}
+              className={itemClass("/Pharmacist/dashboard/equipment")}
+            >
+              Equipment
             </Sidebar.Item>
           </Sidebar.ItemGroup>
 

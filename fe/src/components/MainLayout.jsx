@@ -6,9 +6,15 @@ const MainLayout = () => {
   return (
     <>
       <Navbar />
-      <main className="min-h-screen">
+
+      {/* 
+        pt-16  → if Navbar height is ~64px
+        pt-20  → if Navbar height is ~80px
+      */}
+      <main className="min-h-screen pt-16">
         <Outlet />
       </main>
+
       <HospitalFooter />
     </>
   );
