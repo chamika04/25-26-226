@@ -1,66 +1,58 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-
-import Navbar from '../components/Navbar';
-import mainbanner from '../assets/Main-Banner-1.png';
-import MyFooter from '../components/MyFooter';
+import React from "react";
+import { useNavigate } from "react-router-dom";
 
 export default function Home() {
   const navigate = useNavigate();
-  const [cart, setCart] = useState([]);
-
-  const handleAddToCart = (product) => {
-    const exists = cart.some((item) => item._id === product._id);
-    if (!exists) {
-      setCart([...cart, product]);
-    }
-  };
-
-  const goToPrescriptionForm = () => {
-    navigate('/prescriptionform');
-  };
 
   return (
-    <div className="min-h-screen font-quicksand">
-      {/* Navbar with cart length */}
-      <Navbar size={cart.length} />
+    <div
+      className="min-h-screen flex items-center justify-center relative"
+      style={{
+        backgroundImage:
+          "url('https://w0.peakpx.com/wallpaper/315/432/HD-wallpaper-medical-hospital.jpg')",
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
+      }}
+    >
+      {/* Overlay */}
+      <div className="absolute inset-0 bg-blue-900/50"></div>
 
-      {/* ===== HERO SECTION WITH IMAGE BACKGROUND ===== */}
-      <div
-        className="relative w-full flex items-center justify-center min-h-screen"
-        style={{
-          backgroundImage: `url(${mainbanner})`,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          backgroundRepeat: "no-repeat",
-        }}
-      >
-        {/* Optional overlay */}
-        <div className="absolute inset-0 bg-black/30"></div>
+      {/* Content */}
+      <div className="relative z-10 max-w-3xl text-center text-white px-6">
+        <h1 className="text-4xl md:text-5xl font-bold mb-4 leading-tight">
+          Welcome to HospitalCare
+        </h1>
 
-        <div className="relative flex w-full flex-col md:flex-row justify-between items-center gap-12 py-4 text-white px-4 lg:px-24">
-          {/* LEFT TEXT SECTION */}
-          <div className="md:w-1/2 space-y-4">
-            <h2 className="text-5xl font-ebgaramond leading-snug">
-              Manage your health
-            </h2>
-            <h2 className="text-5xl font-ebgaramond leading-snug">
-              with timely medication
-            </h2>
-            <span className="text-7xl font-bold text-blue-400">
-              MediCare+
-            </span>
+        <p className="text-lg md:text-xl mb-8 text-blue-100">
+          View available doctors, check schedules for upcoming days, and plan
+          your hospital visit with confidence.
+        </p>
 
-            <p className="md:w-4/5 text-justify text-lg">
-              Never run out of essential medicine again. Easily upload your prescription
-              and purchase the drugs you need to better manage your health and wellbeing.
-            </p>
+        {/* Info strip */}
+        <div className="mt-10 grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
+          <div className="bg-white/10 backdrop-blur rounded-lg p-4">
+            🕒 OPD Hours <br />
+            <span className="font-semibold">Mon – Fri</span>
+          </div>
+          <div className="bg-white/10 backdrop-blur rounded-lg p-4">
+            👨‍⚕️ Certified Doctors <br />
+            <span className="font-semibold">Multiple Specialties</span>
+          </div>
+          <div className="bg-white/10 backdrop-blur rounded-lg p-4">
+            🚑 Emergency Care <br />
+            <span className="font-semibold">24 × 7</span>
           </div>
         </div>
-      </div>
 
-      {/* FOOTER */}
-      
+        {/* ✅ Get Started Button */}
+        <button
+          onClick={() => navigate("/dashboard_patient")}
+          className="mt-10 px-8 py-3 rounded-full bg-blue-800 hover:bg-blue-300 text-white font-semibold transition duration-300"
+        >
+          Get Started
+        </button>
+      </div>
     </div>
   );
 }

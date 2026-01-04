@@ -54,7 +54,7 @@ const StockManagement = () => {
     <div className="p-6 lg:p-10 bg-gray-100 min-height-screen">
       {/* Header */}
       <div className="flex items-center gap-3 mb-6">
-        <MdLocalPharmacy className="text-blue-600 text-4xl" />
+        <MdLocalPharmacy className="text-blue-800 text-4xl" />
         <h1 className="text-3xl font-bold text-gray-800">
           Stock Management
         </h1>
@@ -91,7 +91,7 @@ const StockManagement = () => {
 
         {/* Buttons */}
         <div className="flex items-center gap-4">
-          <button className="bg-blue-600 text-white px-4 py-2 rounded-md shadow hover:bg-blue-700 flex items-center gap-2">
+          <button className="bg-blue-800 text-white px-4 py-2 rounded-md shadow hover:bg-blue-900 flex items-center gap-2">
             <FaPlus /> Add Medicine
           </button>
 
@@ -104,7 +104,7 @@ const StockManagement = () => {
       {/* Stock Table */}
       <div className="bg-white shadow-lg rounded-lg overflow-hidden">
         <table className="w-full text-left border-collapse">
-          <thead className="bg-blue-600 text-white">
+          <thead className="bg-blue-800 text-white">
             <tr>
               <th className="p-3">Medicine Name</th>
               <th className="p-3">Category</th>

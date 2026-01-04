@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { FaArrowLeft } from "react-icons/fa";
+
 
 const UserDashboard = () => {
   const navigate = useNavigate();
@@ -60,6 +62,15 @@ const UserDashboard = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-green-50 p-6">
+
+      {/* 🔙 Back Button */}
+      <button
+        onClick={() => navigate("/")}
+        className="absolute top-25 left-6 w-10 h-10 rounded-full bg-white shadow-md flex items-center justify-center hover:bg-blue-100 transition"
+        aria-label="Back to Home"
+      >
+        <FaArrowLeft className="text-blue-600" />
+      </button>
 
       {/* Language Dropdown */}
       <div className="flex justify-end mb-4">
@@ -176,6 +187,7 @@ const UserDashboard = () => {
                     {doc.specialty} <br />
                     ⏰ {doc.time}
                   </div>
+
                   <div className="w-12 h-12 relative">
                     <svg viewBox="0 0 36 36" className="w-12 h-12">
                       <circle
@@ -213,7 +225,7 @@ const UserDashboard = () => {
             </div>
 
             <button
-              onClick={() => navigate("/doctor-availability")}
+              onClick={() => navigate("/doctors")}
               className="w-full mt-4 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-colors"
             >
               🩺 {t.checkAvailability}
@@ -244,3 +256,5 @@ const UserDashboard = () => {
 };
 
 export default UserDashboard;
+
+///doctors

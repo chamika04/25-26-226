@@ -12,6 +12,7 @@ import RegisterForm from "../Pages/Login/Register";
 import Admin from "../Pages/Admin/Admin";
 import AdminLayout from "../Pages/Admin/Layout";
 import AdminDashboard from "../Pages/Admin/AdminDashboard";
+import Profile from "../Pages/Login/Profile";
 
 import ETU_HeadLayout from "../Pages/ETU_Head/ETU-HeadLayout";
 import ETU_HeadDashboard from "../Pages/ETU_Head/ETU-HeadDashboard";
@@ -35,6 +36,7 @@ import OPD_DocLayout from "../Pages/OPD_Doctor/OPD_DocLayout";
 import DocAvailability from "../Pages/Patient/DocAvailability";
 import DocProfile from "../Pages/Patient/DocProfile";
 import Dashboard_patient from "../Pages/Patient/Dashboard_patient";
+import Doctors from "../Pages/Patient/Doctors";
 
 import PharmacistDashboard from "../Pages/Pharmacist/PharmacistDashboard";
 import PharmacistLayout from "../Pages/Pharmacist/PharmacistLayout";
@@ -47,7 +49,11 @@ import EquipmentInventory from "../Pages/Pharmacist/Equipment";
 
 import StoreManagerDashboard from "../Pages/Store_Manager/StoreManagerDashboard";
 import StoreManagerLayout from "../Pages/Store_Manager/StoreManagerLayout";
+import ManageEquip from "../Pages/Store_Manager/ManageEquip";
+import ManageMed from "../Pages/Store_Manager/ManageMed";
 import EditProduct from "../Pages/Store_Manager/EditProduct";
+import Alerts from "../Pages/Store_Manager/Alerts"; 
+import InventoryReqStore from "../Pages/Store_Manager/Inventory_Requests";
 
 import WardNurseDashboard from "../Pages/Ward_Nurse/WardNurseDashboard";
 import WardNurseLayout from "../Pages/Ward_Nurse/WardNurseLayout";    
@@ -74,6 +80,7 @@ const router = createBrowserRouter([
       { path:"/dashboard_patient", element:<Dashboard_patient/> },
       { path:"/docAvailability", element:<DocAvailability/> },
       { path:"/docProfile", element:<DocProfile/> },
+      { path:"/doctors", element:<Doctors/> },  
 
       /*{ path:"/product/:id", element:<SingleProduct/>,
         loader:({params})=>fetch(`http://localhost:5000/product/${params.id}`)
@@ -143,6 +150,10 @@ const router = createBrowserRouter([
     element:<StoreManagerLayout/>,
     children:[
      { path:"/Store_Manager/dashboard/StoreManagerDashboard", element:<StoreManagerDashboard/> },
+     { path:"/Store_Manager/dashboard/manage-equip", element:<ManageEquip/> },
+     { path:"/Store_Manager/dashboard/manage-med", element:<ManageMed/> },
+     { path:"/Store_Manager/dashboard/alerts", element:<Alerts/> },
+     { path:"/Store_Manager/dashboard/inventory-requests", element:<InventoryReqStore/> },
      {
         path:"/Store_Manager/dashboard/edit/:id",
         element:<EditProduct/>,
@@ -178,7 +189,8 @@ const router = createBrowserRouter([
     children:[
       { path : '/admin/users', element : <Admin></Admin> },
       { path : '/admin/RegReq', element : <RegReq></RegReq> } ,
-      { path : '/admin/AdminDashboard', element : <AdminDashboard></AdminDashboard> } 
+      { path : '/admin/AdminDashboard', element : <AdminDashboard></AdminDashboard> } ,
+      { path : '/admin/profile', element : <Profile></Profile> },
     ]
   }
  

@@ -90,14 +90,14 @@ const EquipmentManagement = () => {
 
   return (
     <div className="p-8">
-      <h1 className="text-3xl font-bold mb-6 text-blue-700">
+      <h1 className="text-3xl font-bold mb-6 text-blue-800">
         Hospital Equipment Management
       </h1>
 
       {/* Top Row */}
       <div className="flex justify-between mb-6">
         <button
-          className="bg-blue-600 text-white px-4 py-2 rounded"
+          className="bg-blue-800 text-white px-4 py-2 rounded"
           onClick={() => setShowForm(true)}
         >
           Add Equipment
@@ -204,7 +204,7 @@ const EquipmentManagement = () => {
       {/* Table */}
       <table className="w-full border-collapse shadow-lg">
         <thead>
-          <tr className="bg-blue-600 text-white">
+          <tr className="bg-blue-800 text-white">
             <th className="p-3 border">Equipment</th>
             <th className="p-3 border">Quantity</th>
             <th className="p-3 border">Expiry</th>
@@ -259,7 +259,7 @@ const EquipmentManagement = () => {
 
         <button
           disabled={currentPage === categoryList.length - 1}
-          className="px-4 py-2 bg-blue-600 text-white rounded disabled:opacity-50"
+          className="px-4 py-2 bg-blue-800 text-white rounded disabled:opacity-50"
           onClick={() => setCurrentPage(currentPage + 1)}
         >
           Next

@@ -1,19 +1,20 @@
-import { Sidebar } from 'flowbite-react';
+import { Sidebar } from "flowbite-react";
 import {
   HiOutlineHome,
   HiOutlineUserGroup,
   HiOutlineClipboardCheck,
   HiOutlineLogout,
-} from 'react-icons/hi';
-import { useNavigate } from 'react-router-dom';
+  HiOutlineUserCircle,
+} from "react-icons/hi";
+import { useNavigate } from "react-router-dom";
 
 const AdminSidebar = () => {
   const navigate = useNavigate();
 
   const userLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    navigate('/');
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    navigate("/");
   };
 
   return (
@@ -24,7 +25,7 @@ const AdminSidebar = () => {
       {/* Logo + Title */}
       <div className="flex flex-col items-center py-6">
         <img
-          src="../public/img/logo.png"
+          src="/img/logo.png"
           alt="Hospital Logo"
           className="w-24 h-24 mb-10 mt-8"
         />
@@ -35,36 +36,41 @@ const AdminSidebar = () => {
 
       <Sidebar.Items>
         <Sidebar.ItemGroup>
-          {/* Dashboard */}
           <Sidebar.Item
-            href="/admin/AdminDashboard"
+            onClick={() => navigate("/admin/AdminDashboard")}
             icon={HiOutlineHome}
-            className="hover:bg-blue-200 rounded-md"
+            className="hover:bg-blue-200 rounded-md cursor-pointer"
           >
             Dashboard
           </Sidebar.Item>
 
-          {/* Users */}
           <Sidebar.Item
-            href="/admin/users"
+            onClick={() => navigate("/admin/users")}
             icon={HiOutlineUserGroup}
-            className="hover:bg-blue-200 rounded-md"
+            className="hover:bg-blue-200 rounded-md cursor-pointer"
           >
             Users
           </Sidebar.Item>
 
-          {/* Registration Requests */}
           <Sidebar.Item
-            href="/admin/RegReq"
+            onClick={() => navigate("/admin/RegReq")}
             icon={HiOutlineClipboardCheck}
-            className="hover:bg-blue-200 rounded-md"
+            className="hover:bg-blue-200 rounded-md cursor-pointer"
           >
             Registration Requests
+          </Sidebar.Item>
+
+          {/* ✅ Profile */}
+          <Sidebar.Item
+            onClick={() => navigate("/admin/profile")}
+            icon={HiOutlineUserCircle}
+            className="hover:bg-blue-200 rounded-md cursor-pointer"
+          >
+            Profile
           </Sidebar.Item>
         </Sidebar.ItemGroup>
 
         <Sidebar.ItemGroup>
-          {/* Logout */}
           <Sidebar.Item
             icon={HiOutlineLogout}
             onClick={userLogout}

@@ -4,7 +4,7 @@ import { HiArrowLeft } from "react-icons/hi";
 import { useFormik } from "formik";
 import toast, { Toaster } from "react-hot-toast";
 import { useAuthStore } from "../../store/store";
-import { verifyPassword } from "../../helper/helper";
+import { verifyPassword, getUserData } from "../../helper/helper"; // ✅ add getUserData
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -22,6 +22,7 @@ const LoginPage = () => {
     validate,
     validateOnBlur: false,
     validateOnChange: false,
+
     onSubmit: async (values) => {
       setUsername(values.username);
 
@@ -30,71 +31,80 @@ const LoginPage = () => {
       toast.promise(loginPromise, {
         loading: "Checking...",
         success: "Login successful",
-        error: "Invalid username or password"
+        error: "Invalid username or password",
       });
 
-      loginPromise
-        .then((res) => {
-          // backend returns { message, username, role, token }
-          const { token, role, username } = res;
+      try {
+        // backend returns { message, username, role, token }
+        const res = await loginPromise;
 
-          // Patients are not allowed to login to dashboards
-          if (role === "patient") {
-            toast.error("Patients cannot log in to the dashboard");
-            return;
-          }
+        const { token, role, username } = res;
 
-          // store token and basic user info
-          localStorage.setItem("token", token);
-          localStorage.setItem("user", JSON.stringify({ username, role }));
+        // Patients are not allowed to login to dashboards
+        if (role === "patient") {
+          toast.error("Patients cannot log in to the dashboard");
+          return;
+        }
 
-          // navigate to the correct dashboard based on role
-          switch (role) {
-            case "admin":
-              navigate("/admin/AdminDashboard");
-              break;
+        // ✅ fetch full user to get _id (because your backend user routes use /:id)
+        const fullUser = await getUserData(username);
 
-            case "pharmacist":
-              navigate("/Pharmacist/dashboard/PharmacistDashboard");
-              break;
+        // store token and basic user info (include _id)
+        localStorage.setItem("token", token);
+        localStorage.setItem(
+          "user",
+          JSON.stringify({
+            _id: fullUser?._id,
+            username,
+            role,
+          })
+        );
 
-            case "store_manager":
-              navigate("/Store_Manager/dashboard/StoreManagerDashboard");
-              break;
+        // navigate to the correct dashboard based on role
+        switch (role) {
+          case "admin":
+            navigate("/admin/AdminDashboard");
+            break;
 
-            case "ward_nurse":
-              navigate("/Ward_Nurse/dashboard/WardNurseDashboard");
-              break;
+          case "pharmacist":
+            navigate("/Pharmacist/dashboard/PharmacistDashboard");
+            break;
 
-            case "etu_nurse":
-              navigate("/ETU_Nurse/dashboard/ETU_NurseDashboard");
-              break;
+          case "store_manager":
+            navigate("/Store_Manager/dashboard/StoreManagerDashboard");
+            break;
 
-            case "etu_head":
-              navigate("/ETU_Head/dashboard/dashboard");
-              break;
+          case "ward_nurse":
+            navigate("/Ward_Nurse/dashboard/WardNurseDashboard");
+            break;
 
-            case "opd_doc":
-              navigate("/OPD_Doctor/dashboard/OPD_DocDashboard");
-              break;
+          case "etu_nurse":
+            navigate("/ETU_Nurse/dashboard/ETU_NurseDashboard");
+            break;
 
-            case "etu_doc":
-              navigate("/ETU_Doctor/dashboard/ETU_DocDashboard");
-              break;
+          case "etu_head":
+            navigate("/ETU_Head/dashboard/dashboard");
+            break;
 
-            case "methaRole":
-              navigate("/Metha/dashboard/MethaRoleDashboard");
-              break;
+          case "opd_doc":
+            navigate("/OPD_Doctor/dashboard/OPD_DocDashboard");
+            break;
 
-            default:
-              navigate("/");
-          }
-        })
-        .catch(() => {
-          // error case is already handled by toast.promise, but keep fallback
-          toast.error("Login failed. Please check your credentials.");
-        });
-    }
+          case "etu_doc":
+            navigate("/ETU_Doctor/dashboard/ETU_DocDashboard");
+            break;
+
+          case "methaRole":
+            navigate("/Metha/dashboard/MethaRoleDashboard");
+            break;
+
+          default:
+            navigate("/");
+        }
+      } catch (err) {
+        toast.error("Login failed. Please check your credentials.");
+      }
+    },
   });
 
   return (
