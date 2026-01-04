@@ -83,7 +83,7 @@ const LoginPage = () => {
               break;
 
             case "methaRole":
-              navigate("/surveillance/dashboard");
+              navigate("/Metha/dashboard/MethaRoleDashboard");
               break;
 
             default:

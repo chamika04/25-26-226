@@ -13,16 +13,10 @@ import Admin from "../Pages/Admin/Admin";
 import AdminLayout from "../Pages/Admin/Layout";
 import AdminDashboard from "../Pages/Admin/AdminDashboard";
 
-import DashboardLayout from "../Pages/Medicine/DashBoard/DashboardLayout";
-import Dashboard from "../Pages/Medicine/DashBoard/Dashboard";
-import UploadProduct from "../Pages/Medicine/DashBoard/UploadProduct";
-import EditProduct from "../Pages/Medicine/DashBoard/EditProduct";
-import ManageMed from "../Pages/Medicine/DashBoard/ManageMed";
-import ManageEquip from"../Pages/Medicine/DashBoard/ManageEquip";
-
 import Forecast from "../Pages/ETU_Head/Forecast";
 import ETU_HeadLayout from "../Pages/ETU_Head/ETU-HeadLayout";
 import ETU_HeadDashboard from "../Pages/ETU_Head/ETU-HeadDashboard";
+import ETU_HeadGraphs from "../Pages/ETU_Head/ETU_HeadGraphs";  
 
 import ETU_DocDashboard from "../Pages/ETU_Doctor/ETU-DocDashboard";
 import ETU_DocLayout from "../Pages/ETU_Doctor/ETU-DocLayout";
@@ -32,12 +26,16 @@ import ETU_NurseLayout from "../Pages/ETU_Nurse/ETU_NurseLayout";
 
 import OPD_DocDashboard from "../Pages/OPD_Doctor/OPD_DocDashboard";
 import OPD_DocLayout from "../Pages/OPD_Doctor/OPD_DocLayout";
+import DocAvailability from "../Pages/Patient/DocAvailability";
+import DocProfile from "../Pages/Patient/DocProfile";
 
 import PharmacistDashboard from "../Pages/Pharmacist/PharmacistDashboard";
 import PharmacistLayout from "../Pages/Pharmacist/PharmacistLayout";
+import PharmacistGraphs from "../Pages/Pharmacist/PharmacistGraphs";
 
 import StoreManagerDashboard from "../Pages/Store_Manager/StoreManagerDashboard";
 import StoreManagerLayout from "../Pages/Store_Manager/StoreManagerLayout";
+import EditProduct from "../Pages/Store_Manager/EditProduct";
 
 import WardNurseDashboard from "../Pages/Ward_Nurse/WardNurseDashboard";
 import WardNurseLayout from "../Pages/Ward_Nurse/WardNurseLayout";    
@@ -73,6 +71,7 @@ const router = createBrowserRouter([
     children:[
       { path:"/ETU_Head/dashboard/forecast", element:<Forecast/> },
       { path:"/ETU_Head/dashboard/dashboard", element:<ETU_HeadDashboard/> },
+      { path:"/ETU_Head/dashboard/graphs", element:<ETU_HeadGraphs/> },
       
     ]
   },
@@ -100,7 +99,8 @@ const router = createBrowserRouter([
     element:<OPD_DocLayout/>,
     children:[
       { path:"/OPD_Doctor/dashboard/OPD_DocDashboard", element:<OPD_DocDashboard/> },
-      
+      { path:"/OPD_Doctor/dashboard/docAvailability", element:<DocAvailability/> },
+      { path:"/OPD_Doctor/dashboard/docProfile", element:<DocProfile/> },
     ]
   },
 
@@ -109,6 +109,7 @@ const router = createBrowserRouter([
     element:<PharmacistLayout/>,
     children:[
       { path:"/Pharmacist/dashboard/PharmacistDashboard", element:<PharmacistDashboard/> },
+      { path:"/Pharmacist/dashboard/PharmacistGraphs", element:<PharmacistGraphs/> },
       
     ]
   },
@@ -118,6 +119,13 @@ const router = createBrowserRouter([
     element:<StoreManagerLayout/>,
     children:[
      { path:"/Store_Manager/dashboard/StoreManagerDashboard", element:<StoreManagerDashboard/> },
+     {
+        path:"/Store_Manager/dashboard/edit/:id",
+        element:<EditProduct/>,
+        loader: ({ params }) =>
+        axios.get(`http://localhost:8070/product/get/${params.id}`)
+        .then(response => response.data)
+      }
       
     ]
   },
@@ -137,25 +145,6 @@ const router = createBrowserRouter([
     children:[
       { path:"/Metha/dashboard/MethaRoleDashboard", element:<MethaRoleDashboard/> },
       
-    ]
-  },
-
-  {
-    path:"/medicine/dashboard",
-    element:<DashboardLayout/>,
-    children:[
-      { path:"/medicine/dashboard", element:<Dashboard/> }, 
-      { path:"/medicine/dashboard/upload", element:<UploadProduct/> },
-      { path:"/medicine/dashboard/manage", element:<ManageMed/> },
-      { path:"/medicine/dashboard/manage_eqp", element:<ManageEquip/> },
-      
-      {
-        path:"/medicine/dashboard/edit/:id",
-        element:<EditProduct/>,
-        loader: ({ params }) =>
-        axios.get(`http://localhost:8070/product/get/${params.id}`)
-        .then(response => response.data)
-      }
     ]
   },
 

@@ -1,13 +1,13 @@
 import React from 'react';
 import { Outlet } from 'react-router-dom';
-import HeadSidebar from './ETU_HeadSidebar';
+import ETU_HeadSidebar from './ETU_HeadSidebar';
 
 const ETU_HeadLayout = () => {
   return (
     <div className="flex h-screen overflow-hidden">
       {/* Fixed Sidebar */}
       <div className="w-64 flex-shrink-0 h-full">
-        <HeadSidebar />
+        <ETU_HeadSidebar />
       </div>
 
       {/* Main Content */}
