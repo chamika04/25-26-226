@@ -1,13 +1,13 @@
 import React from 'react';
 import { Outlet } from 'react-router-dom';
-import DocSidebar from './ETU_DocSidebar';
+import MethaRoleSidebar from './MethaRoleSidebar';
 
-const ETU_DocLayout = () => {
+const MethaRoleLayout = () => {
   return (
     <div className="flex h-screen overflow-hidden">
       {/* Fixed Sidebar */}
       <div className="w-64 flex-shrink-0 h-full">
-        <DocSidebar />
+        <MethaRoleSidebar />
       </div>
 
       {/* Main Content */}
@@ -18,4 +18,4 @@ const ETU_DocLayout = () => {
   );
 };
 
-export default ETU_DocLayout;
+export default MethaRoleLayout;

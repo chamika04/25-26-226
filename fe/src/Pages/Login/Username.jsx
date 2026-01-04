@@ -1,7 +1,6 @@
 import React from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { HiArrowLeft } from "react-icons/hi";
-import avatar from '../../assets/profile.png';
 import { useFormik } from "formik";
 import toast, { Toaster } from "react-hot-toast";
 import { useAuthStore } from "../../store/store";
@@ -25,45 +24,92 @@ const LoginPage = () => {
     validateOnChange: false,
     onSubmit: async (values) => {
       setUsername(values.username);
-      localStorage.setItem("User", JSON.stringify({ username: values.username }));
 
-      const loginPromise = verifyPassword({
-        username: values.username,
-        password: values.password,
-      });
+      const loginPromise = verifyPassword(values);
 
       toast.promise(loginPromise, {
         loading: "Checking...",
-        success: <b>Login Successfully!</b>,
-        error: <b>Username or Password Incorrect!</b>,
+        success: "Login successful",
+        error: "Invalid username or password"
       });
 
-      loginPromise.then((res) => {
-        const { token, user } = res;
-        const role = user.role?.toLowerCase();
-        localStorage.setItem("token", token);
-        localStorage.setItem("user", JSON.stringify(user));
+      loginPromise
+        .then((res) => {
+          // backend returns { message, username, role, token }
+          const { token, role, username } = res;
 
-        if (role === "admin") navigate("/admin/dashboard");
-        else if (role === "pharmacist") navigate("/medicine/dashboard");
-        else navigate("/");
-      });
-    },
+          // Patients are not allowed to login to dashboards
+          if (role === "patient") {
+            toast.error("Patients cannot log in to the dashboard");
+            return;
+          }
+
+          // store token and basic user info
+          localStorage.setItem("token", token);
+          localStorage.setItem("user", JSON.stringify({ username, role }));
+
+          // navigate to the correct dashboard based on role
+          switch (role) {
+            case "admin":
+              navigate("/admin/AdminDashboard");
+              break;
+
+            case "pharmacist":
+              navigate("/Pharmacist/dashboard/PharmacistDashboard");
+              break;
+
+            case "store_manager":
+              navigate("/Store_Manager/dashboard/StoreManagerDashboard");
+              break;
+
+            case "ward_nurse":
+              navigate("/Ward_Nurse/dashboard/WardNurseDashboard");
+              break;
+
+            case "etu_nurse":
+              navigate("/ETU_Nurse/dashboard/ETU_NurseDashboard");
+              break;
+
+            case "etu_head":
+              navigate("/ETU_Head/dashboard/dashboard");
+              break;
+
+            case "opd_doc":
+              navigate("/OPD_Doctor/dashboard/OPD_DocDashboard");
+              break;
+
+            case "etu_doc":
+              navigate("/ETU_Doctor/dashboard/ETU_DocDashboard");
+              break;
+
+            case "methaRole":
+              navigate("/surveillance/dashboard");
+              break;
+
+            default:
+              navigate("/");
+          }
+        })
+        .catch(() => {
+          // error case is already handled by toast.promise, but keep fallback
+          toast.error("Login failed. Please check your credentials.");
+        });
+    }
   });
 
   return (
     <div className="min-h-screen flex bg-blue-50">
-      {/* LEFT FORM PANEL */}
-      <div className="w-full md:w-1/2 flex items-center justify-center relative p-8">
-        {/* BACK BUTTON */}
+      <Toaster position="top-center" />
+
+      {/* LEFT FORM */}
+      <div className="w-full md:w-1/2 flex items-center justify-center relative">
         <button
           onClick={() => navigate("/")}
-          className="absolute top-6 left-6 bg-white shadow-md p-3 rounded-full hover:bg-blue-100 transition"
+          className="absolute top-6 left-6 bg-white shadow-md p-3 rounded-full hover:bg-blue-100"
         >
           <HiArrowLeft className="text-blue-700 text-xl" />
         </button>
 
-        {/* LOGIN FORM CARD */}
         <div className="w-full max-w-xl bg-white rounded-2xl shadow-xl p-8">
           <h2 className="text-2xl font-bold text-blue-800 mb-6 text-center">
             Hospital Staff Login
@@ -72,9 +118,8 @@ const LoginPage = () => {
           <form className="grid gap-4" onSubmit={formik.handleSubmit}>
             <input
               {...formik.getFieldProps("username")}
-              type="text"
               placeholder="Username"
-              className="col-span-2 input"
+              className="input"
             />
             {formik.errors.username && (
               <p className="text-red-600 text-sm">{formik.errors.username}</p>
@@ -84,7 +129,7 @@ const LoginPage = () => {
               {...formik.getFieldProps("password")}
               type="password"
               placeholder="Password"
-              className="col-span-2 input"
+              className="input"
             />
             {formik.errors.password && (
               <p className="text-red-600 text-sm">{formik.errors.password}</p>
@@ -92,24 +137,17 @@ const LoginPage = () => {
 
             <button
               type="submit"
-              className="col-span-2 mt-4 bg-blue-700 text-white py-3 rounded-lg font-semibold hover:bg-blue-800 transition"
+              className="mt-4 bg-blue-700 text-white py-3 rounded-lg font-semibold hover:bg-blue-800"
             >
-              Login to System
+              Login
             </button>
           </form>
 
-          <div className="text-center py-3 text-sm text-gray-500">
+          <div className="text-center mt-4 text-sm text-gray-500">
             <span>
-              Not a Member?{" "}
-              <Link className="text-blue-800" to="/registerForm">
+              Not registered?{" "}
+              <Link to="/registerForm" className="text-blue-800">
                 Register Now
-              </Link>
-            </span>
-            <br />
-            <span>
-              Forgot Password?{" "}
-              <Link className="text-blue-800" to="/recovery">
-                Recover Now
               </Link>
             </span>
           </div>
@@ -117,17 +155,15 @@ const LoginPage = () => {
       </div>
 
       {/* RIGHT DECORATIVE PANEL */}
-      <div className="hidden md:flex w-1/2 bg-gradient-to-br from-blue-300 to-blue-500 relative">
-        <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
-        <div className="z-10 text-white p-16 flex flex-col justify-center">
-          <h1 className="text-4xl font-bold mb-4">Welcome Back!</h1>
-          <p className="text-lg leading-relaxed opacity-90">
-            Access your hospital management dashboard securely. Only authorized hospital staff can login.
+      <div className="hidden md:flex w-1/2 bg-gradient-to-br from-blue-300 to-blue-500">
+        <div className="text-white p-16 flex flex-col justify-center">
+          <h1 className="text-4xl font-bold mb-4">Welcome Back</h1>
+          <p className="text-lg opacity-90">
+            Securely access your hospital management dashboard.
           </p>
         </div>
       </div>
 
-      {/* INPUT STYLES */}
       <style>
         {`
           .input {
@@ -135,15 +171,13 @@ const LoginPage = () => {
             padding: 12px;
             border-radius: 10px;
             outline: none;
-            transition: 0.2s;
           }
           .input:focus {
             border-color: #2563eb;
-            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+            box-shadow: 0 0 0 2px rgba(37,99,235,0.2);
           }
         `}
       </style>
-      <Toaster position="top-center" reverseOrder={false} />
     </div>
   );
 };

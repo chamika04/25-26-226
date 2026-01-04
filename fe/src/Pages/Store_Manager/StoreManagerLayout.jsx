@@ -1,13 +1,13 @@
 import React from 'react';
 import { Outlet } from 'react-router-dom';
-import BedSidebar from './StoreManagerSidebar';
+import StoreManagerSidebar from './StoreManagerSidebar';
 
 const StoreManagerLayout = () => {
   return (
     <div className="flex h-screen overflow-hidden">
       {/* Fixed Sidebar */}
       <div className="w-64 flex-shrink-0 h-full">
-        <BedSidebar />
+        <StoreManagerSidebar />
       </div>
 
       {/* Main Content */}

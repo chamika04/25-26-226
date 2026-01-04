@@ -1,13 +1,13 @@
 import React from 'react';
 import { Outlet } from 'react-router-dom';
-import BedSidebar from './WardNurseSidebar';
+import WardNurseSidebar from './WardNurseSidebar';
 
 const WardNurseLayout = () => {
   return (
     <div className="flex h-screen overflow-hidden">
       {/* Fixed Sidebar */}
       <div className="w-64 flex-shrink-0 h-full">
-        <BedSidebar />
+        <WardNurseSidebar />
       </div>
 
       {/* Main Content */}

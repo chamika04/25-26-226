@@ -22,9 +22,14 @@ const userSchema = new mongoose.Schema(
       type: String,
       enum: [
         "pharmacist",
-        "chief_pharmacist",
+        "etu_head",
         "store_manager",
         "ward_nurse",
+        "etu_nurse",
+        "etu_doc",
+        "opd_doc",
+        "patient",
+        "methaRole",
         "admin"
       ],
       required: true

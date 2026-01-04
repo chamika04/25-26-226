@@ -42,6 +42,8 @@ import StoreManagerLayout from "../Pages/Store_Manager/StoreManagerLayout";
 import WardNurseDashboard from "../Pages/Ward_Nurse/WardNurseDashboard";
 import WardNurseLayout from "../Pages/Ward_Nurse/WardNurseLayout";    
 
+import MethaRoleLayout from "../Pages/MethaRole/MethaRoleLayout";
+import MethaRoleDashboard from "../Pages/MethaRole/MethaRoleDashboard";
 
 const router = createBrowserRouter([
   {
@@ -125,6 +127,15 @@ const router = createBrowserRouter([
     element:<WardNurseLayout/>,
     children:[
       { path:"/Ward_Nurse/dashboard/WardNurseDashboard", element:<WardNurseDashboard/> },
+      
+    ]
+  },
+
+  {
+    path:"/Metha/dashboard",
+    element:<MethaRoleLayout/>,
+    children:[
+      { path:"/Metha/dashboard/MethaRoleDashboard", element:<MethaRoleDashboard/> },
       
     ]
   },

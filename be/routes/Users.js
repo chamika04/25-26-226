@@ -6,9 +6,14 @@ const router = express.Router();
 
 const VALID_ROLES = [
   "pharmacist",
-  "chief_pharmacist",
+  "etu_head",
   "store_manager",
   "ward_nurse",
+  "etu_nurse",
+  "etu_doc",
+  "opd_doc",
+  "patient",
+  "methaRole",
   "admin"
 ];
 
@@ -16,7 +21,14 @@ const VALID_ROLES = [
 // 🔹 REGISTER USER
 router.post("/register", async (req, res) => {
   try {
-    const { username, email, password, role } = req.body;
+    const { username,
+      email,
+      password,
+      role,
+      firstName,
+      lastName,
+      mobile,
+      address } = req.body;
 
     if (!VALID_ROLES.includes(role)) {
       return res.status(400).json({ message: "Invalid user role" });
@@ -36,14 +48,18 @@ router.post("/register", async (req, res) => {
       username,
       email,
       password: hashedPassword,
-      role
+      role,
+      firstName,
+      lastName,
+      mobile,
+      address
     });
 
-    const savedUser = await user.save();
+    await user.save();
 
-    res.status(201).json(savedUser);
+    res.status(201).json({ message: "User registered successfully" });
   } catch (error) {
-    console.error(error);
+    console.error("REGISTER ERROR:", error.message);
     res.status(500).json({ message: "Server Error" });
   }
 });

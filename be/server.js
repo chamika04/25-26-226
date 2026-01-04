@@ -11,13 +11,21 @@ app.use(cors());
 app.use(express.json()); // built-in body parser
 
 /* -------------------- MongoDB -------------------- */
-mongoose
+
+/*mongoose
   .connect(process.env.MONGODB_URL, {
     useNewUrlParser: true,
     useUnifiedTopology: true
   })
   .then(() => console.log("MongoDB connection successful"))
+  .catch((err) => console.error("MongoDB connection error:", err)); */
+
+  mongoose
+  .connect(process.env.MONGODB_URL)
+  .then(() => console.log("MongoDB connection successful"))
   .catch((err) => console.error("MongoDB connection error:", err));
+
+  //MONGODB_URL=mongodb+srv://famousfiveproject31:gg79ZAXI9vSELnAr@itpm.gsmz0.mongodb.net/?retryWrites=true&w=majority&appName=ITPM
 
 /* -------------------- Routes -------------------- */
 
