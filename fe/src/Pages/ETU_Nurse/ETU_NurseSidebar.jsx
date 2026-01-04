@@ -52,12 +52,47 @@ const ETU_NurseSidebar = () => {
               </Sidebar.Item>
   
               <Sidebar.Item
-                onClick={() => navigate("/medicine/analytics")}
+                onClick={() => navigate("/ETU_Nurse/dashboard/ETU_NurseForecast")}
                 icon={HiOutlineChartBar}
-                className={itemClass("/medicine/analytics")}
+                className={itemClass("/ETU_Nurse/dashboard/ETU_NurseForecast")}
               >
-                Bed
+                Bed Forecasting
               </Sidebar.Item>
+
+              {/* Sub-items for Bed Forecasting */}
+              <div className="pl-6 mt-1 space-y-1">
+                <Sidebar.Item
+                  icon={HiOutlineClipboardList}
+                  onClick={() => navigate("/ETU_Nurse/dashboard/ETU_NurseDailyInput")}
+                  className={itemClass("/ETU_Nurse/dashboard/ETU_NurseDailyInput")}
+                >
+                  DailyInput
+                </Sidebar.Item>
+
+                <Sidebar.Item
+                  icon={HiOutlineBeaker}
+                  onClick={() => navigate("/ETU_Nurse/dashboard/ETU_NurseInventory")}
+                  className={itemClass("/ETU_Nurse/dashboard/ETU_NurseInventory")}
+                >
+                  Inventory
+                </Sidebar.Item>
+
+                <Sidebar.Item
+                  icon={HiOutlineChartBar}
+                  onClick={() => navigate("/ETU_Nurse/dashboard/ETU_NurseForecast")}
+                  className={itemClass("/ETU_Nurse/dashboard/ETU_NurseForecast")}
+                >
+                  Forecast
+                </Sidebar.Item>
+
+                <Sidebar.Item
+                  icon={HiOutlineChartBar}
+                  onClick={() => navigate("/ETU_Nurse/dashboard/ETU_NurseTrend")}
+                  className={itemClass("/ETU_Nurse/dashboard/ETU_NurseTrend")}
+                >
+                  Trend
+                </Sidebar.Item>
+              </div>
   
               <Sidebar.Item
                 onClick={() => navigate("/ETU_Nurse/dashboard/medicine")}

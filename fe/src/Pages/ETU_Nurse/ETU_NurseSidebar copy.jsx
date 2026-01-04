@@ -1,4 +1,3 @@
-import React, { useState, useEffect } from "react";
 import { Sidebar } from "flowbite-react";
 import {
   HiOutlineHome,
@@ -9,24 +8,12 @@ import {
   HiOutlineChevronDown,
 } from "react-icons/hi";
 import { useNavigate, useLocation } from "react-router-dom";
+import { useState } from "react";
 
-const ETU_HeadSidebar = () => {
+const ETU_NurseSidebar = () => {
   const navigate = useNavigate();
   const location = useLocation();
-
   const [bedsOpen, setBedsOpen] = useState(false);
-
-  const bedRoutes = [
-    "/ETU_Head/dashboard/trend",
-    "/ETU_Head/dashboard/forecast",
-    "/ETU_Head/dashboard/optimization",
-  ];
-
-  const isBedsActive = bedRoutes.includes(location.pathname);
-
-  useEffect(() => {
-    if (isBedsActive) setBedsOpen(true);
-  }, [isBedsActive]);
 
   const userLogout = () => {
     localStorage.removeItem("token");
@@ -42,6 +29,14 @@ const ETU_HeadSidebar = () => {
          ? "bg-blue-200 text-blue-900 font-semibold"
          : "text-slate-800 hover:bg-blue-100"
      }`;
+
+  const bedsPaths = [
+    "/ETU_Head/dashboard/trend",
+    "/ETU_Head/dashboard/forecast",
+    "/ETU_Head/dashboard/optimization",
+  ];
+
+  const isBedsActive = bedsPaths.includes(location.pathname);
 
   return (
     <Sidebar aria-label="Pharmacist Sidebar" className="h-screen w-64 border-r border-blue-200">
@@ -61,36 +56,37 @@ const ETU_HeadSidebar = () => {
           <Sidebar.ItemGroup className="bg-transparent space-y-1">
 
             <Sidebar.Item
-              onClick={() => navigate("/ETU_Head/dashboard/dashboard")}
+              onClick={() => navigate("/ETU_Nurse/dashboard/ETU_NurseDashboard")}
               icon={HiOutlineHome}
-              className={itemClass("/ETU_Head/dashboard/dashboard")}
+              className={itemClass("/ETU_Nurse/dashboard/ETU_NurseDashboard")}
             >
               Dashboard
             </Sidebar.Item>
 
             <Sidebar.Item
-              onClick={() => navigate("/ETU_Head/dashboard/graphs")}
+              onClick={() => navigate("/medicine/analytics")}
               icon={HiOutlineChartBar}
-              className={itemClass("/ETU_Head/dashboard/graphs")}
+              className={itemClass("/medicine/analytics")}
             >
-              Trends
+              Forecast
             </Sidebar.Item>
 
             <Sidebar.Item
-              onClick={() => navigate("/ETU_Head/dashboard/medandequip")}
+              onClick={() => navigate("/medicine/dashboard/manage")}
               icon={HiOutlineBeaker}
-              className={itemClass("/ETU_Head/dashboard/medandequip")}
+              className={itemClass("/medicine/dashboard/manage")}
             >
-              Inventory
+              Medicine
             </Sidebar.Item>
 
             <Sidebar.Item
-              onClick={() => navigate("/ETU_Head/dashboard/doctors")}
+              onClick={() => navigate("/medicine/dashboard/manage_eqp")}
               icon={HiOutlineClipboardList}
-              className={itemClass("/ETU_Head/dashboard/doctors")}
+              className={itemClass("/medicine/dashboard/manage_eqp")}
             >
-              Doctors
+              Equipments
             </Sidebar.Item>
+            
             {/* Bed Forecasting: collapsible parent with three sub-pages */}
             <div className="bg-transparent mt-4">
               <Sidebar.Item
@@ -113,27 +109,34 @@ const ETU_HeadSidebar = () => {
               {bedsOpen && (
                 <div className="pl-6 mt-2 space-y-1">
                   <Sidebar.Item
-                    onClick={() => navigate("/ETU_Head/dashboard/trend")}
+                    onClick={() => navigate("/ETU_Nurse/dashboard/ETU_NurseTrend")}
                     icon={HiOutlineChartBar}
-                    className={itemClass("/ETU_Head/dashboard/trend")}
+                    className={itemClass("/ETU_Nurse/dashboard/ETU_NurseTrend")}
                   >
                     Trend Page
                   </Sidebar.Item>
 
                   <Sidebar.Item
-                    onClick={() => navigate("/ETU_Head/dashboard/forecast")}
+                    onClick={() => navigate("/ETU_Nurse/dashboard/ETU_NurseForecast")}
                     icon={HiOutlineBeaker}
-                    className={itemClass("/ETU_Head/dashboard/forecast")}
+                    className={itemClass("/ETU_Nurse/dashboard/ETU_NurseForecast")}
                   >
                     Forecast Page
                   </Sidebar.Item>
 
                   <Sidebar.Item
-                    onClick={() => navigate("/ETU_Head/dashboard/optimization")}
+                    onClick={() => navigate("/ETU_Nurse/dashboard/ETU_NurseDailyInput")}
                     icon={HiOutlineClipboardList}
-                    className={itemClass("/ETU_Head/dashboard/optimization")}
+                    className={itemClass("/ETU_Nurse/dashboard/ETU_NurseDailyInput")}
                   >
-                    Optimization Page
+                    DailyInput
+                  </Sidebar.Item>
+                  <Sidebar.Item
+                    onClick={() => navigate("/ETU_Nurse/dashboard/ETU_NurseInventory")}
+                    icon={HiOutlineClipboardList}
+                    className={itemClass("/ETU_Nurse/dashboard/ETU_NurseInventory")}
+                  >
+                    Inventory 
                   </Sidebar.Item>
                 </div>
               )}
@@ -156,4 +159,4 @@ const ETU_HeadSidebar = () => {
   );
 };
 
-export default ETU_HeadSidebar;
+export default ETU_NurseSidebar;
