@@ -31,6 +31,11 @@ import ETU_NurseDashboard from "../Pages/ETU_Nurse/ETU_NurseDashboard";
 import ETU_NurseLayout from "../Pages/ETU_Nurse/ETU_NurseLayout";
 import Medicine from "../Pages/ETU_Nurse/Medicine";
 import Equipment from "../Pages/ETU_Nurse/Equipment";
+import ETU_NurseAddBed from "../Pages/ETU_Nurse/ETU_NurseAddBed";////////
+import ETU_NurseDailyInput from "../Pages/ETU_Nurse/ETU_NurseDailyInput";///////
+import ETU_NurseInventory from "../Pages/ETU_Nurse/ETU_NurseInventory";/////////
+import ETU_NurseForecast from "../Pages/ETU_Nurse/ETU_NurseForecast";/////
+import ETU_NurseTrend from "../Pages/ETU_Nurse/ETU_NurseTrend";//////
 
 import OPD_DocDashboard from "../Pages/OPD_Doctor/OPD_DocDashboard";
 import OPD_DocLayout from "../Pages/OPD_Doctor/OPD_DocLayout";
@@ -106,6 +111,11 @@ const router = createBrowserRouter([
       { path:"/ETU_Nurse/dashboard/ETU_NurseDashboard", element:<ETU_NurseDashboard/> },
       { path:"/ETU_Nurse/dashboard/medicine", element:<Medicine/> },
       { path:"/ETU_Nurse/dashboard/equipment", element:<Equipment/> },
+      { path:"/ETU_Nurse/dashboard/ETU_NurseAddBed", element:<ETU_NurseAddBed/> },/////
+      { path:"/ETU_Nurse/dashboard/ETU_NurseDailyInput", element:<ETU_NurseDailyInput/> },///////
+      { path:"/ETU_Nurse/dashboard/ETU_NurseInventory", element:<ETU_NurseInventory/> },//////
+      { path:"/ETU_Nurse/dashboard/ETU_NurseForecast", element:<ETU_NurseForecast/> },///////
+      { path:"/ETU_Nurse/dashboard/ETU_NurseTrend", element:<ETU_NurseTrend/> },//////
       
     ]
   },
