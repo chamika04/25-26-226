@@ -13,16 +13,21 @@ import Admin from "../Pages/Admin/Admin";
 import AdminLayout from "../Pages/Admin/Layout";
 import AdminDashboard from "../Pages/Admin/AdminDashboard";
 
-import Forecast from "../Pages/ETU_Head/Forecast";
 import ETU_HeadLayout from "../Pages/ETU_Head/ETU-HeadLayout";
 import ETU_HeadDashboard from "../Pages/ETU_Head/ETU-HeadDashboard";
 import ETU_HeadGraphs from "../Pages/ETU_Head/ETU_HeadGraphs";  
+import MedandEquip from "../Pages/ETU_Head/MedandEquipShow";
+import DocDetails from "../Pages/ETU_Head/DocDetails";
 
 import ETU_DocDashboard from "../Pages/ETU_Doctor/ETU-DocDashboard";
 import ETU_DocLayout from "../Pages/ETU_Doctor/ETU-DocLayout";
+import DocManage from "../Pages/ETU_Doctor/DocManage";
+import DocAppointments from "../Pages/ETU_Doctor/DocAppointments";
 
 import ETU_NurseDashboard from "../Pages/ETU_Nurse/ETU_NurseDashboard";
 import ETU_NurseLayout from "../Pages/ETU_Nurse/ETU_NurseLayout";
+import Medicine from "../Pages/ETU_Nurse/Medicine";
+import Equipment from "../Pages/ETU_Nurse/Equipment";
 
 import OPD_DocDashboard from "../Pages/OPD_Doctor/OPD_DocDashboard";
 import OPD_DocLayout from "../Pages/OPD_Doctor/OPD_DocLayout";
@@ -69,10 +74,11 @@ const router = createBrowserRouter([
     path:"/ETU_Head/dashboard",
     element:<ETU_HeadLayout/>,
     children:[
-      { path:"/ETU_Head/dashboard/forecast", element:<Forecast/> },
       { path:"/ETU_Head/dashboard/dashboard", element:<ETU_HeadDashboard/> },
       { path:"/ETU_Head/dashboard/graphs", element:<ETU_HeadGraphs/> },
-      
+      { path:"/ETU_Head/dashboard/medandequip", element:<MedandEquip/> },
+      { path:"/ETU_Head/dashboard/doctors", element:<DocDetails/> },
+
     ]
   },
 
@@ -81,6 +87,8 @@ const router = createBrowserRouter([
     element:<ETU_DocLayout/>,
     children:[
       { path:"/ETU_Doctor/dashboard/ETU_DocDashboard", element:<ETU_DocDashboard/> },
+      {path: "/ETU_Doctor/dashboard/docManage", element:<DocManage/> },
+      {path: "/ETU_Doctor/dashboard/docAppointments", element:<DocAppointments/> },
       
     ]
   },
@@ -90,6 +98,8 @@ const router = createBrowserRouter([
     element:<ETU_NurseLayout/>,
     children:[
       { path:"/ETU_Nurse/dashboard/ETU_NurseDashboard", element:<ETU_NurseDashboard/> },
+      { path:"/ETU_Nurse/dashboard/medicine", element:<Medicine/> },
+      { path:"/ETU_Nurse/dashboard/equipment", element:<Equipment/> },
       
     ]
   },

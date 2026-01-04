@@ -69,7 +69,7 @@ const PharmacistDashboard = () => {
             Add New Medicine
           </button>
 
-          <button className="bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-700">
+          <button className="bg-blue-900 text-white py-3 rounded-lg font-semibold hover:bg-blue-800">
             Open Analytics (Forecast & Usage)
           </button>
         </div>

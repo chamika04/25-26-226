@@ -8,7 +8,7 @@ import {
 
 const ETU_HeadDashboard = () => {
   return (
-    <div className="w-full min-h-screen bg-blue-100 p-6 mt-20">
+    <div className="w-full min-h-screen bg-blue-100 p-6 mt-1">
       {/* Title */}
       <h1 className="text-3xl font-bold text-blue-900 mb-6">
         Hospital Bed Management Dashboard

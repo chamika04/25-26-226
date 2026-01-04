@@ -13,12 +13,7 @@
   display: flex;
   justify-content: space-between;
   gap: 16px;
-  flex-wrap: wrap;
   padding: 18px 18px;
-  border-radius: 16px;
-  background: linear-gradient(135deg, rgba(37, 99, 235, 0.10), rgba(14, 165, 233, 0.10));
-  border: 1px solid rgba(59, 130, 246, 0.22);
-  box-shadow: 0 10px 30px rgba(2, 6, 23, 0.06);
   margin-bottom: 18px;
 }
 
@@ -165,14 +160,15 @@
 
 .tiles {
   margin-top: 16px;
+  margin-bottom: 20px;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 12px;
 }
 
 .tile {
-  border: 1px solid rgba(148, 163, 184, 0.35);
-  background: rgba(255, 255, 255, 0.86);
+  border: 1px solid rgba(99, 102, 241, 0.35); /* soft indigo */
+  background: rgba(237, 233, 254, 0.86); /* very light purple */
   border-radius: 16px;
   padding: 14px 14px;
   cursor: pointer;
@@ -181,18 +177,18 @@
   gap: 10px;
   align-items: center;
   text-align: left;
-  box-shadow: 0 10px 22px rgba(2, 6, 23, 0.06);
+  box-shadow: 0 10px 22px rgba(67, 56, 202, 0.06);
 }
 
 .tile:hover {
   transform: translateY(-1px);
-  border-color: rgba(59, 130, 246, 0.45);
-  box-shadow: 0 16px 34px rgba(2, 6, 23, 0.10);
+  border-color: rgba(99, 102, 241, 0.55);
+  box-shadow: 0 16px 34px rgba(67, 56, 202, 0.12);
 }
 
 .tileActive {
-  border-color: rgba(37, 99, 235, 0.65);
-  background: rgba(219, 234, 254, 0.85);
+  border-color: rgba(99, 102, 241, 0.65);
+  background: rgba(233, 213, 255, 0.90); /* soft purple */
 }
 
 .tileIcon {
@@ -202,9 +198,9 @@
   border-radius: 12px;
   align-items: center;
   justify-content: center;
-  background: rgba(37, 99, 235, 0.10);
-  border: 1px solid rgba(37, 99, 235, 0.18);
-  color: #1d4ed8;
+  background: rgba(99, 102, 241, 0.10);
+  border: 1px solid rgba(99, 102, 241, 0.18);
+  color: #6D28D9;
 }
 
 .tileText {
