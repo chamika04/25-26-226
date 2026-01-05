@@ -1,109 +1,99 @@
-import React from "react";
-import {
-  FaBed,
-  FaProcedures,
-  FaHospitalAlt,
-  FaExclamationTriangle,
-  FaChartLine,
-  FaUserInjured
-} from "react-icons/fa";
+import React, { useState } from "react";
+
 
 const ETU_DocDashboard = () => {
+  const [openDoctor, setOpenDoctor] = useState(null);
+  const [openAppt, setOpenAppt] = useState(null);
+
+  const doctors = [
+    { id: 1, name: "Dr. Samantha Perera", specialization: "Cardiologist", contact: "077-1234567", email: "samantha.perera@example.com", availability: "Mon-Fri • 8:00 AM – 12:00 PM" },
+    { id: 2, name: "Dr. Nuwan Jayasinghe", specialization: "Dermatologist", contact: "077-2345678", email: "nuwan.j@example.com", availability: "Tue-Thu • 9:00 AM – 1:00 PM" },
+    { id: 3, name: "Dr. Methsan Herath", specialization: "Orthopedic", contact: "077-3456789", email: "methsan.h@example.com", availability: "Mon, Wed • 2:00 PM – 6:00 PM" },
+  ];
+
+  const appointments = [
+    { id: 1, patient: "Chamika Adikari", doctor: "Dr. Samantha Perera", date: "2026-01-05", time: "10:00 AM", status: "Confirmed", reason: "Follow-up" },
+    { id: 2, patient: "Nimal Perera", doctor: "Dr. Nuwan Jayasinghe", date: "2026-01-07", time: "11:30 AM", status: "Pending", reason: "Skin rash" },
+    { id: 3, patient: "Samantha Silva", doctor: "Dr. Methsan Herath", date: "2026-01-09", time: "2:00 PM", status: "Confirmed", reason: "Knee pain" },
+  ];
+
   return (
     <div className="w-full min-h-screen bg-blue-100 p-6 mt-20">
 
       {/* Title */}
       <h1 className="text-3xl font-bold text-blue-900 mb-6">
-        Hospital Bed Management Dashboard
-      </h1>
+        Doctor Dashboard
+      </h1> 
 
-      {/* Top Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
 
-        {/* Total Beds */}
-        <div className="bg-white shadow-md rounded-xl p-5 border-l-4 border-blue-500">
-          <div className="flex items-center space-x-4">
-            <FaBed className="text-blue-600 text-3xl" />
-            <div>
-              <p className="text-gray-600 font-semibold">Total Beds</p>
-              <h3 className="text-2xl font-bold">320</h3>
-            </div>
-          </div>
-        </div>
 
-        {/* Occupied Beds */}
-        <div className="bg-white shadow-md rounded-xl p-5 border-l-4 border-red-500">
-          <div className="flex items-center space-x-4">
-            <FaProcedures className="text-red-600 text-3xl" />
-            <div>
-              <p className="text-gray-600 font-semibold">Occupied Beds</p>
-              <h3 className="text-2xl font-bold">278</h3>
-            </div>
-          </div>
-        </div>
 
-        {/* Available Beds */}
-        <div className="bg-white shadow-md rounded-xl p-5 border-l-4 border-green-500">
-          <div className="flex items-center space-x-4">
-            <FaHospitalAlt className="text-green-600 text-3xl" />
-            <div>
-              <p className="text-gray-600 font-semibold">Available Beds</p>
-              <h3 className="text-2xl font-bold">42</h3>
-            </div>
-          </div>
-        </div>
 
-        {/* Critical Alerts */}
-        <div className="bg-white shadow-md rounded-xl p-5 border-l-4 border-yellow-500">
-          <div className="flex items-center space-x-4">
-            <FaExclamationTriangle className="text-yellow-600 text-3xl" />
-            <div>
-              <p className="text-gray-600 font-semibold">Critical Alerts</p>
-              <h3 className="text-2xl font-bold">3</h3>
-            </div>
-          </div>
-        </div>
-
-      </div>
-
-      {/* Charts Section */}
+      {/* Appointments & Doctors */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-10">
+        <div className="lg:col-span-2 bg-white shadow-md rounded-xl p-6">
+          <h2 className="text-xl font-semibold mb-4">Upcoming Appointments</h2>
 
-        {/* Occupancy Trend */}
-        <div className="bg-white shadow-md rounded-xl p-6">
-          <h2 className="text-xl font-semibold mb-3">Bed Occupancy Trend</h2>
-          <div className="h-56 bg-gray-200 rounded-lg flex items-center justify-center text-gray-500">
-            Line Chart Placeholder
+          <div className="space-y-4">
+            {appointments.map((a) => (
+              <div key={a.id} className="bg-gray-50 border border-slate-200 rounded-lg p-4">
+                <div className="flex justify-between">
+                  <div>
+                    <p className="font-semibold">{a.patient}</p>
+                    <p className="text-sm text-gray-500">{a.doctor} • {a.date} • {a.time}</p>
+                  </div>
+
+                  <div className="text-right">
+                    <span className={`px-3 py-1 rounded-full text-xs ${a.status === 'Confirmed' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>{a.status}</span>
+                    <button onClick={() => setOpenAppt(openAppt === a.id ? null : a.id)} className="ml-3 text-sm text-blue-600">View</button>
+                  </div>
+                </div>
+
+                {openAppt === a.id && (
+                  <div className="mt-3 text-sm text-gray-700">
+                    <p><strong>Reason:</strong> {a.reason}</p>
+                    <p><strong>Contact:</strong> {a.contact || '077-0000000'}</p>
+                  </div>
+                )}
+              </div>
+            ))}
           </div>
         </div>
 
-        {/* Ward-wise Occupancy */}
         <div className="bg-white shadow-md rounded-xl p-6">
-          <h2 className="text-xl font-semibold mb-3">Ward-wise Occupancy</h2>
-          <div className="h-56 bg-gray-200 rounded-lg flex items-center justify-center text-gray-500">
-            Bar Chart Placeholder
+          <h2 className="text-xl font-semibold mb-4">Doctors Directory</h2>
+          <div className="space-y-3 max-h-96 overflow-y-auto">
+            {doctors.map((d) => (
+              <div key={d.id} className="border border-slate-200 rounded-lg p-3">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <p className="font-semibold">{d.name}</p>
+                    <p className="text-sm text-gray-500">{d.specialization}</p>
+                    <p className="text-sm text-gray-500">{d.availability}</p>
+                  </div>
+
+                  <div className="text-right">
+                    <button onClick={() => setOpenDoctor(openDoctor === d.id ? null : d.id)} className="text-sm text-blue-600">Details</button>
+                  </div>
+                </div>
+
+                {openDoctor === d.id && (
+                  <div className="mt-3 text-sm text-gray-700">
+                    <p><strong>Contact:</strong> {d.contact}</p>
+                    <p><strong>Email:</strong> {d.email}</p>
+                  </div>
+                )}
+              </div>
+            ))}
           </div>
         </div>
-
-        {/* Expected Discharges */}
-        <div className="bg-white shadow-md rounded-xl p-6">
-          <h2 className="text-xl font-semibold mb-3">Expected Discharges</h2>
-          <div className="h-56 bg-gray-200 rounded-lg flex items-center justify-center text-gray-500">
-            Forecast Chart Placeholder
-          </div>
-        </div>
-
       </div>
 
-      {/* Alerts Panel */}
-      <div className="bg-white shadow-md rounded-xl p-6 mt-10">
-        <h2 className="text-xl font-semibold mb-4">Alerts</h2>
+      {/* Notifications */}
+      <div className="bg-white shadow-md rounded-xl p-6 mt-6">
+        <h2 className="text-xl font-semibold mb-4">Notifications</h2>
 
         <ul className="space-y-3">
-
-          <li className="bg-red-100 text-red-700 p-3 rounded-lg border border-red-300">
-            🚨 ICU beds are <strong>95% occupied</strong>.
-          </li>
 
           <li className="bg-yellow-100 text-yellow-800 p-3 rounded-lg border border-yellow-300">
             ⚠ Emergency ward expected surge due to <strong>road accidents</strong>.
@@ -113,9 +103,8 @@ const ETU_DocDashboard = () => {
             ℹ 18 patient discharges expected today.
           </li>
 
-          {/* Medicine-linked alert */}
           <li className="bg-orange-100 text-orange-800 p-3 rounded-lg border border-orange-300">
-            ⚠ Low stock of <strong>IV fluids</strong> may affect bed admissions.
+            ⚠ Low stock of <strong>IV fluids</strong> may affect treatments; consider restock.
           </li>
 
         </ul>

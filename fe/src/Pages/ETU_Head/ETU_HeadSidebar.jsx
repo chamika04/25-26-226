@@ -68,29 +68,30 @@ const ETU_HeadSidebar = () => {
             </Sidebar.Item>
 
             <Sidebar.Item
-              onClick={() => navigate("/medicine/analytics")}
+              onClick={() => navigate("/ETU_Head/dashboard/graphs")}
               icon={HiOutlineChartBar}
-              className={itemClass("/medicine/analytics")}
+              className={itemClass("/ETU_Head/dashboard/graphs")}
             >
               Forecast
             </Sidebar.Item>
 
             <Sidebar.Item
-              onClick={() => navigate("/medicine/dashboard/manage")}
+              onClick={() => navigate("/ETU_Head/dashboard/medandequip")}
               icon={HiOutlineBeaker}
-              className={itemClass("/medicine/dashboard/manage")}
+              className={itemClass("/ETU_Head/dashboard/medandequip")}
             >
-              Medicine
+              Inventory
             </Sidebar.Item>
 
             <Sidebar.Item
-              onClick={() => navigate("/medicine/dashboard/manage_eqp")}
-              icon={HiOutlineClipboardList}
-              className={itemClass("/medicine/dashboard/manage_eqp")}
+              onClick={() => navigate("/ETU_Head/dashboard/doctors")}
+              icon={HiOutlineBeaker}
+              className={itemClass("/ETU_Head/dashboard/doctors")}
             >
-              Equipments
+              Doctor Details
             </Sidebar.Item>
-            
+
+          
             {/* Bed Forecasting: collapsible parent with three sub-pages */}
             <div className="bg-transparent mt-4">
               <Sidebar.Item
