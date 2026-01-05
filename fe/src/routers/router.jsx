@@ -37,6 +37,9 @@ import ETU_NurseDailyInput from "../Pages/ETU_Nurse/ETU_NurseDailyInput";///////
 import ETU_NurseInventory from "../Pages/ETU_Nurse/ETU_NurseInventory";/////////
 import ETU_NurseForecast from "../Pages/ETU_Nurse/ETU_NurseForecast";/////
 import ETU_NurseTrend from "../Pages/ETU_Nurse/ETU_NurseTrend";//////
+import ETU_HeadIllnessAlerts from "../Pages/ETU_Head/ETU_HeadIllnessAlerts";
+import ETU_HeadIllnessForecast from "../Pages/ETU_Head/ETU_HeadIllnessForecast";
+import ETU_HeadIllnessTrendsPage from "../Pages/ETU_Head/ETU_HeadIllnessTrendsPage";
 
 import OPD_DocDashboard from "../Pages/OPD_Doctor/OPD_DocDashboard";
 import OPD_DocLayout from "../Pages/OPD_Doctor/OPD_DocLayout";
@@ -112,6 +115,9 @@ const router = createBrowserRouter([
       { path:"/ETU_Head/dashboard/forecast", element:<ETU_BedForecast/> },////////
       { path:"/ETU_Head/dashboard/trend", element:<ETU_BedTrend/> },///////
       { path:"/ETU_Head/dashboard/optimization", element:<ETU_BedOptimization/> },///////
+      { path:"/ETU_Head/dashboard/ETU_HeadIllnessAlerts", element:<ETU_HeadIllnessAlerts/> },
+      { path:"/ETU_Head/dashboard/ETU_HeadIllnessForecast", element:<ETU_HeadIllnessForecast/> },
+      { path:"/ETU_Head/dashboard/ETU_HeadIllnessTrendsPage", element:<ETU_HeadIllnessTrendsPage/> },
 
     ]
   },
