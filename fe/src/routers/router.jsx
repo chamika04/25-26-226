@@ -69,6 +69,10 @@ import WardNurseDailyInput from "../Pages/Ward_Nurse/WardNurseDailyInput";/////
 
 import MethaRoleLayout from "../Pages/MethaRole/MethaRoleLayout";
 import MethaRoleDashboard from "../Pages/MethaRole/MethaRoleDashboard";
+import IllnessAlerts from "../Pages/MethaRole/IllnessAlerts";
+import IllnessForecast from "../Pages/MethaRole/IllnessForecast";
+import IllnessTrendsPage from "../Pages/MethaRole/IllnessTrendsPage";
+import TrainModel from "../Pages/MethaRole/TrainModel";
 
 const router = createBrowserRouter([
   {
@@ -183,10 +187,15 @@ const router = createBrowserRouter([
   },
 
   {
-    path:"/Ward_Nurse/dashboard",
-    element:<WardNurseLayout/>,
+    path:"/Metha/dashboard",
+    element:<MethaRoleLayout/>,
     children:[
-      { path:"/Ward_Nurse/dashboard/WardNurseDashboard", element:<WardNurseDashboard/> },
+      { path:"/Metha/dashboard/MethaRoleDashboard", element:<MethaRoleDashboard/> },
+      
+      { path:"/Metha/dashboard/IllnessAlerts", element:<IllnessAlerts/> },
+      { path:"/Metha/dashboard/IllnessForecast", element:<IllnessForecast/> },
+      { path:"/Metha/dashboard/IllnessTrendsPage", element:<IllnessTrendsPage/> },
+      { path:"/Metha/dashboard/TrainModel", element:<TrainModel/> },
       
     ]
   },
