@@ -12,7 +12,7 @@ import styles from './ETU_BedOptimization.module.css';
 
 const ETU_BedOptimization = () => {
   // --- MOCK DATA ---
-  // Scenario: 29 Patients Expected
+  // Scenario: 0 Patients Expected
   // Logic: 
   // - 7 Stay (Observation)
   // - 13 Transfer (4 Pending + 9 New)
@@ -20,7 +20,7 @@ const ETU_BedOptimization = () => {
   const forecastData = {
     date: '2025-12-31',
     shift: 'Night Shift',
-    expectedPatients: 29,
+    expectedPatients: 20,
     capacity: 20,
     driver: 'Heavy Rainfall Alert', 
     driverIcon: CloudRain,
@@ -28,13 +28,13 @@ const ETU_BedOptimization = () => {
   };
 
   const actionPlan = {
-    keepInETU: 7, // Matches "Keep in ETU" on Dashboard
+    keepInETU: 10, // Matches "Keep in ETU" on Dashboard
     transfers: [
       { ward: 'Ward A (Medical)', count: 4, type: 'Internal' }, // Matches "4 Pending Transfers" on Dashboard
-      { ward: 'Ward B (Surgical)', count: 4, type: 'Internal' },
-      { ward: 'Maternity Ward', count: 5, type: 'Internal' } 
+      { ward: 'Ward B (Surgical)', count: 2, type: 'Internal' },
+      
     ],
-    surge: 9 // The remaining overflow
+    surge: 4 // The remaining overflow
   };
 
   const [isApproved, setIsApproved] = useState(false);
@@ -68,7 +68,7 @@ const ETU_BedOptimization = () => {
             <div className={styles.bigNumberContainer}>
               <span className={styles.label}>Expected Total Patients</span>
               <div className={styles.bigNumber}>{forecastData.expectedPatients}</div>
-              <span className={styles.subLabel}>vs. 20 Bed Capacity</span>
+              <span className={styles.subLabel}>vs. 50 Bed Capacity</span>
             </div>
 
             <div className={styles.driverBox}>
