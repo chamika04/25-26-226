@@ -1,0 +1,26 @@
+[
+  {
+    "type": "LOW_STOCK",
+    "severity": "WARNING",
+    "medicine_name": "Ibupromycin",
+    "message": "Ibupromycin is below reorder level. Current stock: 95."
+  },
+  {
+    "type": "STOCKOUT_SOON",
+    "severity": "WARNING",
+    "medicine_name": "Ibupromycin",
+    "message": "Ibupromycin stock will run out in 8 days (based on forecast)."
+  },
+  {
+    "type": "LOW_STOCK",
+    "severity": "WARNING",
+    "medicine_name": "Clarivir",
+    "message": "Clarivir is below reorder level. Current stock: 60."
+  },
+  {
+    "type": "STOCKOUT_SOON",
+    "severity": "CRITICAL",
+    "medicine_name": "Clarivir",
+    "message": "Clarivir stock will run out in 1 days (based on forecast)."
+  }
+]

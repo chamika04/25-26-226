@@ -1,0 +1,56 @@
+{
+  "Metoprofen": {
+    "current_stock": 260,
+    "batches": [
+      {
+        "batch_no": "MTP-2401",
+        "expiry_date": "2026-08-15",
+        "qty": 220
+      },
+      {
+        "batch_no": "MTP-2312",
+        "expiry_date": "2026-03-10",
+        "qty": 40
+      }
+    ],
+    "reorder_level": 120
+  },
+  "Acetomet": {
+    "current_stock": 200,
+    "batches": [
+      {
+        "batch_no": "ACT-2402",
+        "expiry_date": "2026-07-01",
+        "qty": 180
+      },
+      {
+        "batch_no": "ACT-2311",
+        "expiry_date": "2026-02-28",
+        "qty": 20
+      }
+    ],
+    "reorder_level": 150
+  },
+  "Ibupromycin": {
+    "current_stock": 95,
+    "batches": [
+      {
+        "batch_no": "IBU-2402",
+        "expiry_date": "2026-06-10",
+        "qty": 95
+      }
+    ],
+    "reorder_level": 100
+  },
+  "Clarivir": {
+    "current_stock": 60,
+    "batches": [
+      {
+        "batch_no": "CLR-2401",
+        "expiry_date": "2026-04-05",
+        "qty": 60
+      }
+    ],
+    "reorder_level": 80
+  }
+}
