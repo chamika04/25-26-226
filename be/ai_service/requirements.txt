@@ -1,0 +1,22 @@
+# General Backend
+flask
+flask-cors
+pymongo
+
+# Component 1: Bed Demand (Your Part)
+torch
+pytorch-forecasting
+pulp
+
+# Component 2: No-Show Prediction
+scikit-learn
+tensorflow
+
+# Component 3: Illness Trend Forecasting
+prophet
+statsmodels
+
+# Component 4: Medicine & Emergency
+pandas
+numpy
+joblib
