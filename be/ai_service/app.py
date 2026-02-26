@@ -1,22 +1,30 @@
-from flask import Flask
-from flask_cors import CORS
+import os
+import importlib.util
 
-# Import the blueprints from your component files
-# (You will define these in the component files first)
-from components.bed_logic import bed_blueprint
-from components.noshow_logic import noshow_blueprint
-from components.illness_logic import illness_blueprint
-from components.medicine_logic import medicine_blueprint
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-app = Flask(__name__)
-CORS(app)
+try:
+    # Try package import first
+    from Bed.bed_logic import app
+except Exception:
+    # Fallback: load by file path (works regardless of CWD)
+    bed_file = os.path.join(BASE_DIR, 'Bed', 'bed_logic.py')
+    alt_file = os.path.join(BASE_DIR, 'bed_logic.py')
 
-# Registering all 4 components under one "roof"
-app.register_blueprint(bed_blueprint, url_prefix='/api/beds')
-app.register_blueprint(noshow_blueprint, url_prefix='/api/no-show')
-app.register_blueprint(illness_blueprint, url_prefix='/api/illness')
-app.register_blueprint(medicine_blueprint, url_prefix='/api/medicine')
+    if os.path.exists(bed_file):
+        spec = importlib.util.spec_from_file_location('bed_logic', bed_file)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        app = module.app
+    elif os.path.exists(alt_file):
+        spec = importlib.util.spec_from_file_location('bed_logic', alt_file)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        app = module.app
+    else:
+        raise ImportError("Could not locate 'bed_logic' module (tried Bed/bed_logic.py and bed_logic.py)")
 
-if __name__ == "__main__":
-    # This runs the whole project on one port
-    app.run(host='0.0.0.0', port=5000, debug=True)
+if __name__ == '__main__':
+    print("🚀 Initializing Hospital AI System via app.py...")
+    print("📈 Starting Flask server on Port 5001...")
+    app.run(debug=True, port=5001, host='0.0.0.0')
