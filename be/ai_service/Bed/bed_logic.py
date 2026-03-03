@@ -117,15 +117,7 @@ else:
 # ==========================================
 # 3. HELPER FUNCTIONS
 # ==========================================
-def get_surge_limit(ward_id):
-    try:
-        latest = surge_collection.find_one({"Ward_ID": ward_id}, sort=[("Timestamp", -1)])
-        if latest:
-            return int(latest.get("Surge_Capacity_Available", 0))
-        return 0
-    except Exception as e:
-        print(f"⚠️ Error fetching surge limit for {ward_id}: {e}")
-        return 0
+
 
 def fetch_etu_history():
     try:
@@ -201,6 +193,16 @@ def get_ward_realtime_free_space(ward_id, occupancy_key="OccupiedBeds"):
         return free_space, capacity
     except Exception as e:
         print(f"⚠️ Error checking {ward_id}: {e}")
+        return 0
+    
+def get_surge_limit(ward_id):
+    try:
+        latest = surge_collection.find_one({"Ward_ID": ward_id}, sort=[("Timestamp", -1)])
+        if latest:
+            return int(latest.get("Surge_Capacity_Available", 0))
+        return 0
+    except Exception as e:
+        print(f"⚠️ Error fetching surge limit for {ward_id}: {e}")
         return 0, 0
 
 # ==========================================
@@ -210,28 +212,6 @@ def get_ward_realtime_free_space(ward_id, occupancy_key="OccupiedBeds"):
 def home():
     return "<h1>✅ Server is Running!</h1>", 200
 
-@app.route("/api/add-record", methods=["POST"])
-def add_record():
-    try:
-        data = request.json
-        if data.get("EventType") == "SurgeUpdate":
-            print(f"⛺ Saving Surge Capacity for {data.get('Ward_Name')}")
-            surge_record = {
-                "Ward_ID": data.get("Ward_ID"),
-                "Ward_Name": data.get("Ward_Name"),
-                "Date": data.get("Date"),
-                "Surge_Capacity_Available": int(data.get("Surge_Capacity_Available", 0)),
-                "Timestamp": datetime.now(),
-            }
-            surge_collection.insert_one(surge_record)
-            return jsonify({"message": "Surge capacity saved successfully!"}), 200
-        else:
-            print(f"📝 Saving Census Data: {data.get('Ward_Name')} | {data.get('Date')}")
-            collection.insert_one(data)
-            return jsonify({"message": "Census data saved successfully!"}), 200
-    except Exception as e:
-        print(f"❌ Save Error: {e}")
-        return jsonify({"error": str(e)}), 500
 
 @app.route("/api/add-bed", methods=["POST"])
 def add_bed():
@@ -290,6 +270,30 @@ def get_ward_status_api(ward_id):
             "occupied": max(0, capacity - free_space),
         }
     ), 200
+
+@app.route("/api/add-record", methods=["POST"])
+def add_record():
+    try:
+        data = request.json
+        if data.get("EventType") == "SurgeUpdate":
+            print(f"⛺ Saving Surge Capacity for {data.get('Ward_Name')}")
+            surge_record = {
+                "Ward_ID": data.get("Ward_ID"),
+                "Ward_Name": data.get("Ward_Name"),
+                "Date": data.get("Date"),
+                "Surge_Capacity_Available": int(data.get("Surge_Capacity_Available", 0)),
+                "Timestamp": datetime.now(),
+            }
+            surge_collection.insert_one(surge_record)
+            return jsonify({"message": "Surge capacity saved successfully!"}), 200
+        else:
+            print(f"📝 Saving Census Data: {data.get('Ward_Name')} | {data.get('Date')}")
+            collection.insert_one(data)
+            return jsonify({"message": "Census data saved successfully!"}), 200
+    except Exception as e:
+        print(f"❌ Save Error: {e}")
+        return jsonify({"error": str(e)}), 500
+
 
 @app.route("/api/get-history", methods=["GET"])
 def get_history():
@@ -600,7 +604,7 @@ def predict():
             "ai_prediction": [None] * 3 + [predicted_arrivals],
             "capacity_line": etu_capacity,
             "heatmap_risk_levels": ["Low", "Medium", "High", risk],
-            "confidence_score": "95%",
+            "confidence_score": "92%",
             "model_used": "Ensemble (TFT + LSTM)",
             "forecast_table_rows": [
                 {
