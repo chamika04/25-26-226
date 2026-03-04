@@ -32,6 +32,10 @@ try:
     history_collection = db["BedPredictionHistory"]  # AI Predictions
     bed_inventory_collection = db["BedInventory"]    # Physical Assets
     surge_collection = db["BedSurgeArea"]            # Surge Capacity Table
+    # NOTE: We no longer keep a separate ETU approvals collection.
+    # Use a single transfer/audit collection for both active state (latest per ward)
+    # and append-only logs.
+    etu_transfer_collection = db["Bed_TransferCount"]
 
     client.admin.command("ping")
     print("✅ Connected to Cloud Database!")
@@ -205,6 +209,124 @@ def get_surge_limit(ward_id):
         print(f"⚠️ Error fetching surge limit for {ward_id}: {e}")
         return 0, 0
 
+
+# -----------------------------
+# ETU Approvals helpers
+# -----------------------------
+def save_etu_approval(data: dict):
+    try:
+        # expected fields: ward_id, target_date, target_shift, approved (bool), suggested_number (int), reason (str), nurse_id
+        filter_q = {
+            "ward_id": data.get("ward_id"),
+            "target_date": data.get("target_date"),
+            "target_shift": data.get("target_shift"),
+        }
+        payload = {
+            "$set": {
+                "ward_id": data.get("ward_id"),
+                "target_date": data.get("target_date"),
+                "target_shift": data.get("target_shift"),
+                "approved": bool(data.get("approved", False)),
+                "suggested_number": int(data.get("suggested_number")) if data.get("suggested_number") is not None else None,
+                "reason": data.get("reason"),
+                "nurse_id": data.get("nurse_id"),
+                "updated_at": datetime.now(),
+            }
+        }
+        # Log the transfer/response into the single TransferCount collection for analytics.
+        try:
+            transfer_record = {
+                "ward_id": data.get("ward_id"),
+                "target_date": data.get("target_date"),
+                "target_shift": data.get("target_shift"),
+                "approved": bool(data.get("approved", False)),
+                "suggested_number": int(data.get("suggested_number")) if data.get("suggested_number") is not None else None,
+                "reason": data.get("reason"),
+                "nurse_id": data.get("nurse_id"),
+                "submitted_at": datetime.now(),
+            }
+
+            # try to attach prediction info if available
+            try:
+                hist = history_collection.find_one({"target_date": data.get("target_date"), "target_shift": data.get("target_shift")})
+                if hist:
+                    transfer_record["predicted_arrivals"] = int(hist.get("predicted_arrivals", 0))
+                    transfer_record["optimization_plan"] = hist.get("optimization_plan")
+            except Exception as e:
+                print(f"⚠️ Could not fetch prediction for transfer record: {e}")
+
+            etu_transfer_collection.insert_one(transfer_record)
+        except Exception as e:
+            print(f"❌ Transfer log save error: {e}")
+
+        return True
+    except Exception as e:
+        print(f"❌ Save approval error: {e}")
+        return False
+
+
+def fetch_etu_approvals(target_date: str, target_shift: str):
+    """
+    Return the latest transfer/log row per ward for the given target_date and target_shift.
+    This function reads from the `Bed_TransferCount` collection and selects the most
+    recent entry (by submitted_at) for each ward.
+    """
+    try:
+        query = {"target_date": target_date, "target_shift": target_shift}
+        # Fetch newest first to simplify "latest per ward" selection and avoid fragile comparisons
+        cursor = etu_transfer_collection.find(query, {"_id": 0}).sort([("submitted_at", -1)])
+        docs = list(cursor)
+
+        latest_by_ward = {}
+        for d in docs:
+            # normalize ward id (trim + uppercase) to avoid mismatches like trailing spaces
+            wid_raw = (d.get("ward_id") or d.get("ward") or "")
+            wid = str(wid_raw).strip().upper()
+            # if we haven't recorded a latest for this ward yet, the current doc is the newest (cursor is desc sorted)
+            if wid and wid not in latest_by_ward:
+                latest_by_ward[wid] = d
+
+        return list(latest_by_ward.values())
+    except Exception as e:
+        print(f"❌ Fetch approvals error: {e}")
+        return []
+
+
+def summarize_etu_approvals(target_date: str, target_shift: str):
+    docs = fetch_etu_approvals(target_date, target_shift)
+    wards_of_interest = ["WARD-A", "WARD-B", "GEN"]
+    summary = {w: {"exists": False, "approved": False, "suggested_number": None, "reason": None, "nurse_id": None} for w in wards_of_interest}
+
+    for d in docs:
+        wid = (d.get("ward_id") or d.get("ward") or "").upper()
+        if wid in summary:
+            # prefer explicit updated_at, fallback to submitted_at
+            updated = d.get("updated_at") or d.get("submitted_at")
+            # Interpret suggested_number == 0 as an explicit rejection
+            suggested_val = d.get("suggested_number")
+            try:
+                suggested_num = int(suggested_val) if suggested_val is not None else None
+            except Exception:
+                suggested_num = None
+
+            approved_flag = bool(d.get("approved", False))
+            if suggested_num == 0:
+                approved_flag = False
+
+            summary[wid] = {
+                "exists": True,
+                "approved": approved_flag,
+                "suggested_number": suggested_num,
+                "reason": d.get("reason"),
+                "nurse_id": d.get("nurse_id"),
+                "updated_at": updated,
+            }
+
+    all_approved = all(summary[w]["exists"] and summary[w]["approved"] for w in wards_of_interest)
+    suggested_total = sum(s.get("suggested_number", 0) or 0 for s in summary.values())
+
+    return {"per_ward": summary, "all_approved": all_approved, "suggested_total": suggested_total, "raw": docs}
+
 # ==========================================
 # 4. ROUTES
 # ==========================================
@@ -309,6 +431,62 @@ def get_history():
                 return jsonify({"count": 0, "lastUpdated": None}), 200
 
         return jsonify({"error": "Invalid type"}), 400
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/etu/approve", methods=["POST"])
+def etu_approve():
+    try:
+        data = request.json or {}
+        required = ["ward_id", "target_date", "target_shift", "approved"]
+        for r in required:
+            if r not in data:
+                return jsonify({"error": f"Missing field: {r}"}), 400
+
+        ok = save_etu_approval(data)
+        if not ok:
+            return jsonify({"error": "Failed to save approval"}), 500
+        return jsonify({"message": "Approval saved"}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/etu/approvals", methods=["GET"])
+def etu_approvals_get():
+    try:
+        target_date = request.args.get("target_date")
+        target_shift = request.args.get("target_shift")
+        if not target_date or not target_shift:
+            return jsonify({"error": "target_date and target_shift required"}), 400
+
+        summary = summarize_etu_approvals(target_date, target_shift)
+        return jsonify(summary), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/transfer-count", methods=["GET"])
+def get_transfer_count():
+    try:
+        target_date = request.args.get("target_date")
+        target_shift = request.args.get("target_shift")
+        ward = request.args.get("ward")
+
+        query = {}
+        if target_date:
+            query["target_date"] = target_date
+        if target_shift:
+            query["target_shift"] = target_shift
+        if ward:
+            query["ward_id"] = ward
+
+        docs = list(etu_transfer_collection.find(query, {"_id": 0}).sort([("submitted_at", -1)]).limit(200))
+        # convert datetimes to ISO strings for JSON
+        for d in docs:
+            if isinstance(d.get("submitted_at"), datetime):
+                d["submitted_at"] = d["submitted_at"].isoformat()
+        return jsonify({"count": len(docs), "rows": docs}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
@@ -589,6 +767,8 @@ def predict():
         rec_text = "CRITICAL: Activate Corridor C Protocols immediately."
     elif risk == "High":
         rec_text = "High load expected. Approve overtime."
+    # include approvals summary for ETU so ETU nurse can see ward responses
+    approvals_summary = summarize_etu_approvals(target_date_str, display_shift)
 
     return jsonify(
         {
@@ -622,6 +802,9 @@ def predict():
             "action_plan_surge_breakdown": {"etu": val_keep_s, "ward_a": val_a_s, "ward_b": val_b_s, "general": val_g_s},
             "action_plan_external": val_ext,
             "recommendation_text": rec_text,
+            "ward_approvals": approvals_summary,
+            "target_date": target_date_str,
+            "target_shift": display_shift,
         }
     )
 
