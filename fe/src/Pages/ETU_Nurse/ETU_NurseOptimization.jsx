@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   Calendar, 
   Activity, 
@@ -14,6 +15,7 @@ import {
 } from 'lucide-react';
 
 const ETU_NurseOptimization = () => {
+  const navigate = useNavigate();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -261,7 +263,10 @@ const ETU_NurseOptimization = () => {
       </div>
 
       {/* --- FOOTER BUTTON --- */}
-      <div className="mt-10 flex justify-end">
+      <div className="mt-10 flex justify-end items-center gap-3">
+        <button onClick={() => navigate('/ETU_Nurse/dashboard/ETU_NurseApprovals')} className="flex items-center gap-3 bg-white border border-slate-200 text-slate-900 px-6 py-3 rounded-lg font-semibold hover:bg-slate-50 transition">
+          See Approvals
+        </button>
         <button className="flex items-center gap-3 bg-slate-900 text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-slate-800 transition shadow-xl hover:shadow-2xl transform hover:-translate-y-1">
           <CheckCircle size={24} />
           Approve & Execute Plan

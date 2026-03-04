@@ -64,7 +64,7 @@ const ETU_NurseSidebar = () => {
             {/* Bed Forecasting Group (Collapsible) */}
             <div className="bg-transparent mt-4">
               <Sidebar.Item
-                onClick={() => setBedsOpen(!bedsOpen)} // Toggle state on click
+                onClick={() => setBedsOpen(!bedsOpen)}
                 icon={HiOutlineChartBar}
                 className={`cursor-pointer transition-all duration-200 rounded-lg px-3 py-2 flex items-center gap-2 ${
                   isBedsActive ? 'bg-blue-200 text-blue-900 font-semibold' : 'text-slate-800 hover:bg-blue-100'
@@ -72,8 +72,8 @@ const ETU_NurseSidebar = () => {
               >
                 <div className="flex items-center justify-between w-full">
                   <span>Bed Forecasting</span>
-                  <HiOutlineChevronDown 
-                    className={`ml-2 transform transition-transform duration-200 ${bedsOpen ? 'rotate-180' : 'rotate-0'}`} 
+                  <HiOutlineChevronDown
+                    className={`ml-2 transform transition-transform duration-200 ${bedsOpen ? 'rotate-180' : 'rotate-0'}`}
                   />
                 </div>
               </Sidebar.Item>
@@ -103,7 +103,7 @@ const ETU_NurseSidebar = () => {
                     onClick={() => navigate("/ETU_Nurse/dashboard/ETU_NurseInventory")}
                     className={itemClass("/ETU_Nurse/dashboard/ETU_NurseInventory")}
                   >
-                    Inventory  
+                    Inventory
                   </Sidebar.Item>
 
                   <Sidebar.Item
@@ -112,6 +112,14 @@ const ETU_NurseSidebar = () => {
                     className={itemClass("/ETU_Nurse/dashboard/ETU_NurseTrend")}
                   >
                     Trend
+                  </Sidebar.Item>
+
+                  <Sidebar.Item
+                    icon={HiOutlineChartBar}
+                    onClick={() => navigate("/ETU_Nurse/dashboard/ETU_NurseApprovals")}
+                    className={itemClass("/ETU_Nurse/dashboard/ETU_NurseApprovals")}
+                  >
+                    Approvals
                   </Sidebar.Item>
                 </div>
               )}

@@ -145,6 +145,14 @@ const ETU_HeadSidebar = () => {
                   >
                     Bed Inventory
                   </Sidebar.Item>
+
+                  <Sidebar.Item
+                    onClick={() => navigate("/ETU_Head/dashboard/approvals")}
+                    icon={HiOutlineChartBar}
+                    className={itemClass("/ETU_Head/dashboard/approvals")}
+                  >
+                    Bed Approvals
+                  </Sidebar.Item>
                 </div>
               )}
             </div>

@@ -26,7 +26,8 @@ import DocManage from "../Pages/ETU_Doctor/DocManage";
 import DocAppointments from "../Pages/ETU_Doctor/DocAppointments";
 import ETU_BedInventory from "../Pages/ETU_Head/ETU_BedInventory";/////
 import ETU_BedTrend from "../Pages/ETU_Head/ETU_BedTrend";//////
-import ETU_BedOptimization from "../Pages/ETU_Head/ETU_BedOptimization";//////
+import ETU_BedOptimization from "../Pages/ETU_Head/ETU_BedOptimization";//////ETU_BedApprovals.jsx
+import ETU_BedApprovals from "../Pages/ETU_Head/ETU_BedApprovals";
 
 import ETU_NurseDashboard from "../Pages/ETU_Nurse/ETU_NurseDashboard";
 import ETU_NurseLayout from "../Pages/ETU_Nurse/ETU_NurseLayout";
@@ -37,6 +38,7 @@ import ETU_NurseDailyInput from "../Pages/ETU_Nurse/ETU_NurseDailyInput";///////
 import ETU_NurseInventory from "../Pages/ETU_Nurse/ETU_NurseInventory";/////////
 import ETU_NurseOptimization from "../Pages/ETU_Nurse/ETU_NurseOptimization";/////
 import ETU_NurseTrend from "../Pages/ETU_Nurse/ETU_NurseTrend";//////
+import ETU_NurseApprovals from "../Pages/ETU_Nurse/ETU_NurseApprovals";
 import ETU_HeadIllnessAlerts from "../Pages/ETU_Head/ETU_HeadIllnessAlerts";
 import ETU_HeadIllnessForecast from "../Pages/ETU_Head/ETU_HeadIllnessForecast";
 import ETU_HeadIllnessTrendsPage from "../Pages/ETU_Head/ETU_HeadIllnessTrendsPage";
@@ -126,6 +128,7 @@ const router = createBrowserRouter([
       { path:"/ETU_Head/dashboard/ETU_BedInventory", element:<ETU_BedInventory/> },////////
       { path:"/ETU_Head/dashboard/trend", element:<ETU_BedTrend/> },///////
       { path:"/ETU_Head/dashboard/optimization", element:<ETU_BedOptimization/> },///////
+      { path:"/ETU_Head/dashboard/approvals", element:<ETU_BedApprovals/> },///////
       { path:"/ETU_Head/dashboard/ETU_HeadIllnessAlerts", element:<ETU_HeadIllnessAlerts/> },
       { path:"/ETU_Head/dashboard/ETU_HeadIllnessForecast", element:<ETU_HeadIllnessForecast/> },
       { path:"/ETU_Head/dashboard/ETU_HeadIllnessTrendsPage", element:<ETU_HeadIllnessTrendsPage/> },
@@ -156,6 +159,7 @@ const router = createBrowserRouter([
       { path:"/ETU_Nurse/dashboard/ETU_NurseInventory", element:<ETU_NurseInventory/> },//////
       { path:"/ETU_Nurse/dashboard/ETU_NurseOptimization", element:<ETU_NurseOptimization/> },///////
       { path:"/ETU_Nurse/dashboard/ETU_NurseTrend", element:<ETU_NurseTrend/> },//////
+        { path:"/ETU_Nurse/dashboard/ETU_NurseApprovals", element: <ETU_NurseApprovals/> },
       
     ]
   },
