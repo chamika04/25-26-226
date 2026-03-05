@@ -1,15 +1,24 @@
+"""
+Application bootstrapper for the AI service.
+
+This loader tries to use the Bed module's Flask `app` if available; otherwise
+it registers the Bed blueprint or provides lightweight fallback routes so the
+frontend doesn't get raw 404 HTML pages. Illness blueprint is loaded when
+present. CORS is applied to allow local frontend development.
+"""
+
 import os
 import importlib.util
 from flask import Flask
 from flask_cors import CORS
 
-# 1. Initialize the main Flask App
-app = Flask(__name__)
-
-# 2. Apply CORS to the ENTIRE app (This allows React to talk to Port 5001)
-CORS(app, resources={r"/*": {"origins": "*"}})
-
+# base folder for ai_service
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# primary Flask app (may be replaced by Bed module if it exports its own)
+app = Flask(__name__)
+# allow cross-origin requests for local development
+CORS(app, resources={r"/*": {"origins": "*"}})
 
 def load_module_logic(folder_name, file_name, blueprint_name):
     """Helper function to safely load blueprints dynamically."""
