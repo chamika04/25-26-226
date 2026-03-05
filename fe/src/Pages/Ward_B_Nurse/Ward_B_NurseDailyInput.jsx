@@ -29,7 +29,7 @@ const Ward_B_NurseDailyInput = () => {
   });
 
   // --- WARD CONFIGURATION (Ward B ONLY) ---
-  const wardInfo = { id: 'WARD-B', name: 'Ward B (Surgical)', icon: Bed, color: '#10b981' };
+  const wardInfo = { id: 'WARD-B', name: 'Ward B (Female)', icon: Bed, color: '#ec4899' };
 
   // --- 1. FETCH LATEST SURGE STATUS ON MOUNT ---
   const fetchSurgeStatus = async () => {
