@@ -74,12 +74,22 @@ const Ward_A_NurseDashboard = () => {
               const data = await res.json();
               setPredTargetDate(data.target_date || null);
               setPredTargetShift(data.target_shift || null);
-          // Update to handle the new surge breakdown from backend
-          if (data.action_plan_transfers) {
-            setIncomingWardCount(data.action_plan_transfers.ward_a || 0);
-          }
-          if (data.action_plan_surge_breakdown) {
-            setIncomingSurgeCount(data.action_plan_surge_breakdown.ward_a || 0);
+          // Prefer the new gender-aware optimization payload, fall back to older keys
+          try {
+            if (data.optimization_plan_gender && data.optimization_plan_gender.male) {
+              const malePlan = data.optimization_plan_gender.male;
+              setIncomingWardCount(malePlan.male_ward ?? malePlan.male_ward ?? 0);
+              setIncomingSurgeCount(malePlan.male_ward_surge ?? malePlan.male_ward_surge ?? 0);
+            } else if (data.action_plan_transfers || data.action_plan_surge_breakdown) {
+              setIncomingWardCount((data.action_plan_transfers && (data.action_plan_transfers.ward_a ?? data.action_plan_transfers.wardA)) || 0);
+              setIncomingSurgeCount((data.action_plan_surge_breakdown && (data.action_plan_surge_breakdown.ward_a ?? data.action_plan_surge_breakdown.wardA)) || 0);
+            } else if (typeof data.predicted_arrivals_male !== 'undefined') {
+              // best-effort: if only predicted male arrivals present, show that in ward beds (surge unknown)
+              setIncomingWardCount(Number(data.predicted_arrivals_male) || 0);
+              setIncomingSurgeCount(0);
+            }
+          } catch (e) {
+            console.error('Failed to parse AI plan for male ward', e);
           }
         }
       } catch (err) {
@@ -234,7 +244,7 @@ const Ward_A_NurseDashboard = () => {
     <div style={styles.container}>
       <header style={styles.header}>
         <div>
-          <h1 style={styles.title}>Ward A Command Center</h1>
+          <h1 style={styles.title}>Ward A (Male) Command Center</h1>
           <p style={{ color: '#64748b', fontSize: '15px' }}>AI-Driven Inflow Monitoring</p>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: 10, marginTop: 8 }}>
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '8px 14px', borderRadius: 999, background: '#ffffff', border: '1px solid #dbeafe', boxShadow: '0 1px 2px rgba(16,24,40,0.03)' }}>
@@ -292,12 +302,12 @@ const Ward_A_NurseDashboard = () => {
                 <div style={{ flex: 1 }}>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
                     <div style={{ background: '#eff6ff', padding: '12px', borderRadius: '12px', border: '1px solid #dbeafe' }}>
-                      <p style={{ fontSize: '11px', fontWeight: '700', color: '#3b82f6' }}>WARD BEDS</p>
-                      <p style={{ fontSize: '24px', fontWeight: '800', color: '#1e40af' }}>{incomingWardCount}</p>
+                      <p style={{ fontSize: '11px', fontWeight: '700', color: '#3b82f6' }}>WARD AVAILABLE</p>
+                      <p style={{ fontSize: '24px', fontWeight: '800', color: '#1e40af' }}>{wardData.available ?? 0}</p>
                     </div>
                     <div style={{ background: '#fffbeb', padding: '12px', borderRadius: '12px', border: '1px solid #fef3c7' }}>
-                      <p style={{ fontSize: '11px', fontWeight: '700', color: '#d97706' }}>SURGE BEDS</p>
-                      <p style={{ fontSize: '24px', fontWeight: '800', color: '#9a3412' }}>{incomingSurgeCount}</p>
+                      <p style={{ fontSize: '11px', fontWeight: '700', color: '#d97706' }}>SURGE AREA</p>
+                      <p style={{ fontSize: '24px', fontWeight: '800', color: '#9a3412' }}>{incomingSurgeCount ?? 0}</p>
                     </div>
                   </div>
                   <p style={{ fontSize: '14px', color: '#475569', lineHeight: '1.5' }}>
@@ -343,7 +353,7 @@ const Ward_A_NurseDashboard = () => {
             ) : (
               <div style={{ textAlign: 'center', padding: '32px', color: '#15803d' }}>
                 <CheckCircle2 size={32} style={{ margin: '0 auto 12px' }} />
-                <p>Ward A is currently optimized. No transfers required.</p>
+                <p>Ward A (Male) is currently optimized. No transfers required.</p>
               </div>
             )}
           </div>
