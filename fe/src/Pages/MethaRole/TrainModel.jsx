@@ -1,24 +1,20 @@
 import React, { useState } from 'react';
-import { CheckCircle, Database, FileText } from 'lucide-react';
+import axios from 'axios';
+import { CheckCircle, Database, FileText, AlertCircle, Loader2 } from 'lucide-react';
 
 const TrainModel = () => {
   // Enhanced State to match your Dataset + Research Requirements
   const [formData, setFormData] = useState({
-    date: '',              // Matches 'Date' in CSV
-    disease: '',           // Matches 'Disease_or_Injury' in CSV
-    severity: 'Medium',    // Matches 'Severity' in CSV
-    cases: '',             // Matches 'Case_Count' in CSV
-    department: 'OPD',     // Matches 'Department' in CSV
-    ageGroup: 'All Ages',  // Research Value (Enrichment)
-    granularity: 'Weekly'  // Aggregation logic
+    date: '',
+    disease: '',
+    cases: ''
   });
 
   const [isTraining, setIsTraining] = useState(false);
   const [trainResult, setTrainResult] = useState(null);
+  const [error, setError] = useState(null);
 
-  // Derived from your CSV values
-  const departments = ['OPD', 'Medical Ward', 'Emergency', 'ICU', 'Pediatrics'];
-  const severityLevels = ['Low', 'Medium', 'High'];
+
   
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -28,29 +24,54 @@ const TrainModel = () => {
     }));
   };
 
-  const handleTrainModel = (e) => {
+  const handleTrainModel = async (e) => {
     e.preventDefault();
     
     // Validation
     if (!formData.date || !formData.disease || !formData.cases) {
-      alert('Please fill in required fields from your dataset (Date, Disease, Cases)');
+      setError('Please fill in required fields: Date, Disease, Cases');
       return;
     }
 
-    // Simulate Training Process
+    // Clear previous errors
+    setError(null);
     setIsTraining(true);
     setTrainResult(null);
 
-    setTimeout(() => {
-      setIsTraining(false);
-      setTrainResult({
-        success: true,
-        accuracy: (89 + Math.random() * 5).toFixed(2),
-        timestamp: new Date().toLocaleString(),
-        features_used: ['Date', 'Disease', 'Severity', 'Rainfall_mm (Auto)', 'Temp_C (Auto)'],
-        status: 'Dataset merged & model retrained successfully'
+    try {
+      // Send data to backend API
+      const response = await axios.post('http://127.0.0.1:5001/save_illness_input', {
+        date: formData.date,
+        disease: formData.disease,
+        cases: parseInt(formData.cases),
+        timestamp: new Date().toISOString()
       });
-    }, 2500);
+
+      if (response.data.status === 'success') {
+        setTrainResult({
+          success: true,
+          accuracy: (89 + Math.random() * 5).toFixed(2),
+          timestamp: new Date().toLocaleString(),
+          features_used: ['Date', 'Disease', 'Cases'],
+          status: 'Record successfully saved to database',
+          recordId: response.data.record_id
+        });
+
+        // Clear form
+        setFormData({
+          date: '',
+          disease: '',
+          cases: ''
+        });
+      } else {
+        setError(response.data.message || 'Failed to save data');
+      }
+    } catch (err) {
+      console.error('API Error:', err);
+      setError(err.response?.data?.message || 'Backend connection failed. Ensure Flask server is running on port 5001.');
+    } finally {
+      setIsTraining(false);
+    }
   };
 
   return (
@@ -65,9 +86,9 @@ const TrainModel = () => {
           marginBottom: 32,
           boxShadow: '0 10px 30px rgba(11, 42, 91, 0.15)'
         }}>
-          <h1 style={{ fontSize: 28, fontWeight: 800, margin: 0 }}>Model Retraining & Data Input</h1>
+          <h1 style={{ fontSize: 28, fontWeight: 800, margin: 0 }}>Patient Admission Data Entry</h1>
           <p style={{ margin: '8px 0 0 0', opacity: 0.85, fontSize: 15 }}>
-            Feed new records matching your 10k Hospital Dataset schema
+            Record new patient admissions and illness cases in the hospital
           </p>
         </div>
 
@@ -92,29 +113,16 @@ const TrainModel = () => {
             <form onSubmit={handleTrainModel}>
               <div style={{ display: 'grid', gap: 20 }}>
 
-                {/* Row 1: Date & Severity */}
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-                  <div>
-                    <label style={labelStyle}>Date <span style={{color:'#ef4444'}}>*</span></label>
-                    <input
-                      type="date"
-                      name="date"
-                      value={formData.date}
-                      onChange={handleInputChange}
-                      style={inputStyle}
-                    />
-                  </div>
-                  <div>
-                    <label style={labelStyle}>Severity <span style={{color:'#ef4444'}}>*</span></label>
-                    <select
-                      name="severity"
-                      value={formData.severity}
-                      onChange={handleInputChange}
-                      style={inputStyle}
-                    >
-                      {severityLevels.map(s => <option key={s} value={s}>{s}</option>)}
-                    </select>
-                  </div>
+                {/* Row 1: Date Only */}
+                <div>
+                  <label style={labelStyle}>Date <span style={{color:'#ef4444'}}>*</span></label>
+                  <input
+                    type="date"
+                    name="date"
+                    value={formData.date}
+                    onChange={handleInputChange}
+                    style={inputStyle}
+                  />
                 </div>
 
                 {/* Row 2: Disease Only (Removed ICD-10) */}
@@ -130,62 +138,22 @@ const TrainModel = () => {
                   />
                 </div>
 
-                {/* Row 3: Cases & Department */}
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-                  <div>
-                    <label style={labelStyle}>Case Count <span style={{color:'#ef4444'}}>*</span></label>
-                    <input
-                      type="number"
-                      name="cases"
-                      value={formData.cases}
-                      onChange={handleInputChange}
-                      placeholder="e.g. 26"
-                      min="0"
-                      style={inputStyle}
-                    />
-                  </div>
-                  <div>
-                    <label style={labelStyle}>Department <span style={{color:'#ef4444'}}>*</span></label>
-                    <select
-                      name="department"
-                      value={formData.department}
-                      onChange={handleInputChange}
-                      style={inputStyle}
-                    >
-                      {departments.map(d => <option key={d} value={d}>{d}</option>)}
-                    </select>
-                  </div>
+                {/* Row 3: Cases Only */}
+                <div>
+                  <label style={labelStyle}>Number of Patients <span style={{color:'#ef4444'}}>*</span></label>
+                  <input
+                    type="number"
+                    name="cases"
+                    value={formData.cases}
+                    onChange={handleInputChange}
+                    placeholder="e.g. 5"
+                    min="0"
+                    max="999"
+                    style={inputStyle}
+                  />
                 </div>
 
-                 {/* Row 4: Age Group & Granularity */}
-                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-                  <div>
-                    <label style={labelStyle}>Age Group</label>
-                    <select
-                      name="ageGroup"
-                      value={formData.ageGroup}
-                      onChange={handleInputChange}
-                      style={inputStyle}
-                    >
-                      <option>All Ages</option>
-                      <option>Pediatric (&lt;5)</option>
-                      <option>Adult (18-60)</option>
-                      <option>Senior (60+)</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label style={labelStyle}>Context</label>
-                    <select
-                      name="granularity"
-                      value={formData.granularity}
-                      onChange={handleInputChange}
-                      style={{...inputStyle, color: '#64748b'}}
-                      disabled
-                    >
-                      <option>Weekly (Auto-calculated)</option>
-                    </select>
-                  </div>
-                </div>
+
 
                 {/* Submit Button */}
                 <div style={{ marginTop: 12 }}>
@@ -209,9 +177,33 @@ const TrainModel = () => {
                       gap: 10
                     }}
                   >
-                    {isTraining ? 'Integrating Dataset...' : '+ Commit Record to Model'}
+                    {isTraining ? (
+                      <>
+                        <Loader2 size={18} className="animate-spin" />
+                        Saving to Database...
+                      </>
+                    ) : (
+                      '📊 Save Record to Database'
+                    )}
                   </button>
                 </div>
+
+                {/* Error Alert */}
+                {error && (
+                  <div style={{
+                    background: '#fef2f2',
+                    border: '1px solid #fee2e2',
+                    borderRadius: 10,
+                    padding: 14,
+                    display: 'flex',
+                    gap: 12,
+                    alignItems: 'flex-start',
+                    color: '#991b1b'
+                  }}>
+                    <AlertCircle size={18} style={{ flexShrink: 0, marginTop: 2 }} />
+                    <div style={{ fontSize: 13, lineHeight: 1.5 }}>{error}</div>
+                  </div>
+                )}
 
               </div>
             </form>
@@ -224,20 +216,19 @@ const TrainModel = () => {
             {trainResult && (
               <div style={{
                 background: '#f0fdf4',
-                border: '1px solid #86efac',
+                border: '2px solid #86efac',
                 borderRadius: 16,
                 padding: 20,
                 animation: 'fadeIn 0.5s'
               }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
                   <CheckCircle size={24} color="#16a34a" />
-                  <span style={{ fontSize: 16, fontWeight: 700, color: '#15803d' }}>Training Successful</span>
+                  <span style={{ fontSize: 16, fontWeight: 700, color: '#15803d' }}>✅ Record Saved Successfully</span>
                 </div>
                 <div style={{ fontSize: 14, color: '#166534', lineHeight: 1.6 }}>
-                  <p style={{margin: '4px 0'}}>New Model Accuracy: <strong>{trainResult.accuracy}%</strong></p>
-                  <p style={{margin: '4px 0', fontSize: 13}}>
-                    Features: <em>{trainResult.features_used.join(', ')}</em>
-                  </p>
+                  <p style={{margin: '6px 0'}}>📁 Saved to: <strong>Illness_Inputs Collection</strong></p>
+                  <p style={{margin: '6px 0', fontSize: 13}}>Disease: <strong>{trainResult.status}</strong></p>
+                  <p style={{margin: '6px 0', fontSize: 12, opacity: 0.8}}>ID: {trainResult.recordId}</p>
                 </div>
               </div>
             )}
@@ -255,9 +246,9 @@ const TrainModel = () => {
                   <span style={{ fontSize: 15, fontWeight: 700, color: '#9a3412' }}>Dataset Compatibility</span>
                 </div>
                 <ul style={{ fontSize: 13, color: '#475569', margin: 0, paddingLeft: 16, lineHeight: 1.6 }}>
-                  <li><strong>Rainfall & Temp:</strong> Automatically fetched based on the <em>Date</em> to match your training set features.</li>
-                  <li><strong>Severity:</strong> Added to improve triage prediction accuracy.</li>
-                  <li><strong>Week Number:</strong> Auto-derived from Date (e.g., Week 48).</li>
+                  <li><strong>Date:</strong> Admission or report date for the patient(s).</li>
+                  <li><strong>Disease:</strong> Diagnosis or condition name (e.g., Dengue, Pneumonia).</li>
+                  <li><strong>Cases:</strong> Number of patients with the disease.</li>
                 </ul>
             </div>
 
@@ -271,10 +262,8 @@ const TrainModel = () => {
           </div>
         </div>
       </div>
-   
-    
-  );
-};
+    );
+  };
 
 // Internal styles
 const labelStyle = {
