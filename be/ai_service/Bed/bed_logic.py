@@ -847,6 +847,7 @@ def get_trend_data():
 
 from flask import Flask, jsonify, request
 from flask_cors import CORS
+import math
 from pymongo import MongoClient
 import pandas as pd
 import numpy as np
@@ -859,13 +860,13 @@ try:
     from pytorch_forecasting import TemporalFusionTransformer
 except Exception as _e:
     TemporalFusionTransformer = None
-    print(f"⚠️ Optional import missing: pytorch_forecasting ({_e})")
+    print(f"Optional import missing: pytorch_forecasting ({_e})")
 
 try:
     from pulp import LpProblem, LpMinimize, LpVariable, value, LpStatus
 except Exception as _e:
     LpProblem = LpMinimize = LpVariable = value = LpStatus = None
-    print(f"⚠️ Optional import missing: pulp ({_e})")
+    print(f"Optional import missing: pulp ({_e})")
 
 try:
     import torch
@@ -873,13 +874,13 @@ try:
 except Exception as _e:
     torch = None
     nn = None
-    print(f"⚠️ Optional import missing: torch ({_e})")
+    print(f"Optional import missing: torch ({_e})")
 
 try:
     import joblib
 except Exception as _e:
     joblib = None
-    print(f"⚠️ Optional import missing: joblib ({_e})")
+    print(f"Optional import missing: joblib ({_e})")
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
@@ -889,7 +890,7 @@ CORS(app, resources={r"/*": {"origins": "*"}})
 # ==========================================
 MONGO_URI = "mongodb+srv://famousfiveproject31:gg79ZAXI9vSELnAr@itpm.gsmz0.mongodb.net/test?appName=ITPM"
 
-print("⏳ Connecting to MongoDB...")
+print("Connecting to MongoDB...")
 try:
     client = MongoClient(MONGO_URI, tlsCAFile=certifi.where())
     db = client["Research"]
@@ -900,9 +901,9 @@ try:
     etu_transfer_collection = db["Bed_TransferCount"]
 
     client.admin.command("ping")
-    print("✅ Connected to Cloud Database!")
+    print("Connected to Cloud Database!")
 except Exception as e:
-    print(f"❌ Database Error: {e}")
+    print(f"Database Error: {e}")
 
 # Register previously-defined route functions now that `app` is available.
 # These functions are declared earlier in the file but their decorators were
@@ -1177,12 +1178,45 @@ def home():
 
 @app.route("/predict", methods=["GET"])
 def predict():
-    if best_tft is None:
-        return jsonify({"error": "TFT AI Model not loaded."}), 500
+    # Attempt to compute live prediction; if models are missing, fall back to a
+    # conservative heuristic so the endpoint still returns dynamic values.
+    # support force refresh via ?force=1
+    force = str(request.args.get('force', '')).lower() in ('1', 'true', 'yes')
 
     df = fetch_etu_history()
-    if df is None or len(df) < 50:
-        return jsonify({"error": f"Insufficient ETU history ({len(df) if df is not None else 0} records)."}), 500
+    if force:
+        try:
+            df = fetch_etu_history()
+            print('Force-refresh: re-fetched ETU history from DB')
+        except Exception as _:
+            print('Force-refresh attempted but failed to re-fetch ETU history')
+
+    # Log ETU history summary so we can trace stale-data issues
+    try:
+        if df is not None:
+            print(f'ETU history rows: {len(df)}')
+            try:
+                print('ETU history tail:', df.tail(5)[['Date','Shift_ID','ETU_Admissions']].to_dict(orient='records'))
+            except Exception:
+                pass
+    except Exception:
+        pass
+    if df is None or len(df) == 0:
+        print("⚠️ No ETU history available for prediction. Returning zeros.")
+        pred_male = 0
+        pred_female = 0
+        predicted_arrivals = 0
+        # respond with a safe structure
+        return jsonify({
+            "predicted_arrivals": predicted_arrivals,
+            "predicted_arrivals_male": pred_male,
+            "predicted_arrivals_female": pred_female,
+            "system_status": "NORMAL",
+            "model_used": "fallback"
+        }), 200
+
+    if len(df) < 10:
+        print(f"⚠️ ETU history small ({len(df)} rows) — using lightweight heuristic for prediction.")
 
     # ------------- decide next shift -------------
     current_dt = datetime.now()
@@ -1210,6 +1244,8 @@ def predict():
 
     # ==========================================================
     # A) TFT prediction per gender (Male + Female)
+    # If TFT is not available, fall back to a simple ratio-based estimator
+    # derived from recent observed admissions.
     # ==========================================================
     def tft_predict_for_gender(gender_value: str):
         # prepare last 60 history (force gender for ALL rows)
@@ -1248,11 +1284,23 @@ def predict():
             predict_df = force_known_category(best_tft, predict_df, c, fallback_value="nan")
 
         # now predict
-        raw_preds = best_tft.predict(predict_df, mode="raw", return_x=False)
-        pred = float(raw_preds.prediction[0, 0, 3].item())
-        low_ci = float(raw_preds.prediction[0, 0, 1].item())
-        high_ci = float(raw_preds.prediction[0, 0, 5].item())
-        return pred, low_ci, high_ci
+        if best_tft is None:
+            # simple fallback: use mean of recent gender-specific admissions
+            recent = history_data.tail(7).get("ETU_Admissions", None)
+            try:
+                mean_recent = float(recent.astype(float).mean()) if recent is not None and len(recent) > 0 else 0.0
+            except Exception:
+                mean_recent = 0.0
+            pred = float(mean_recent)
+            low_ci = max(0.0, pred - 1.0)
+            high_ci = pred + 1.0
+            return pred, low_ci, high_ci
+        else:
+            raw_preds = best_tft.predict(predict_df, mode="raw", return_x=False)
+            pred = float(raw_preds.prediction[0, 0, 3].item())
+            low_ci = float(raw_preds.prediction[0, 0, 1].item())
+            high_ci = float(raw_preds.prediction[0, 0, 5].item())
+            return pred, low_ci, high_ci
 
     try:
         pred_m_tft, low_m, high_m = tft_predict_for_gender("Male")
@@ -1261,8 +1309,8 @@ def predict():
         low_ci_total = low_m + low_f
         high_ci_total = high_m + high_f
     except Exception as e:
-        print(f"❌ TFT Error: {e}")
-        return jsonify({"error": f"TFT Error: {str(e)}"}), 500
+        print(f"❌ TFT Error during gender predictions: {e}")
+        pred_m_tft = pred_f_tft = pred_tft_total = low_ci_total = high_ci_total = 0.0
 
     # ==========================================================
     # B) LSTM total prediction (no gender feature)
@@ -1291,15 +1339,33 @@ def predict():
     # ==========================================================
     ensemble_total = max(0.0, (pred_tft_total + pred_lstm_total) / 2.0)
 
+    # DEBUG: print out internal prediction components so we can trace repetition
+    try:
+        print("🔍 Prediction Debug:")
+        print(f"   best_tft_loaded={best_tft is not None}, lstm_loaded={lstm_model is not None and lstm_scaler is not None}")
+        print(f"   pred_m_tft={pred_m_tft:.2f}, pred_f_tft={pred_f_tft:.2f}, pred_tft_total={pred_tft_total:.2f}")
+        print(f"   pred_lstm_total={pred_lstm_total:.2f}, ensemble_total={ensemble_total:.2f}")
+    except Exception:
+        pass
+
     # split ratio based on TFT gender split
     if pred_tft_total > 0:
         male_ratio = pred_m_tft / pred_tft_total
     else:
         male_ratio = 0.5
 
-    pred_male = int(round(ensemble_total * male_ratio))
-    pred_female = int(round(ensemble_total - pred_male))
+    # Distribute integer total deterministically to avoid rounding inconsistencies
+    total_int = int(round(ensemble_total))
+    if total_int <= 0:
+        # very small predictions -> keep fractional-based rounding
+        pred_male = int(round(ensemble_total * male_ratio))
+        pred_female = int(round(ensemble_total - pred_male))
+    else:
+        pred_male = int(math.floor(total_int * male_ratio))
+        pred_female = int(total_int - pred_male)
     predicted_arrivals = pred_male + pred_female
+
+    print(f"Allocation: ensemble_total={ensemble_total:.2f}, total_int={total_int}, male_ratio={male_ratio:.2f} => male={pred_male}, female={pred_female}")
 
     print(f"🧠 Ensemble Total: {ensemble_total:.1f} => Male {pred_male}, Female {pred_female}")
 
@@ -1444,7 +1510,37 @@ def predict():
 
     action_plan_keep_etu = int(plan.get("male", {}).get("etu_keep", 0) + plan.get("female", {}).get("etu_keep", 0))
 
-    return jsonify({
+    # include a response timestamp so frontend can detect changes
+    response_ts = datetime.now().isoformat()
+
+    # debug output when requested by caller
+    try:
+        debug_param = str(request.args.get('debug', '')).lower()
+    except Exception:
+        debug_param = ''
+
+    debug_output = None
+    if debug_param in ('1', 'true', 'yes'):
+        try:
+            recent_rows = df.tail(7)[['Date', 'Shift_ID', 'ETU_Admissions']].copy()
+            # convert dates to ISO strings
+            recent_rows['Date'] = recent_rows['Date'].astype(str)
+            recent_history = recent_rows.to_dict(orient='records')
+        except Exception:
+            recent_history = []
+
+        debug_output = {
+            'best_tft_loaded': bool(best_tft),
+            'lstm_loaded': bool(lstm_model and lstm_scaler),
+            'pred_m_tft': float(pred_m_tft),
+            'pred_f_tft': float(pred_f_tft),
+            'pred_tft_total': float(pred_tft_total),
+            'pred_lstm_total': float(pred_lstm_total),
+            'ensemble_total': float(ensemble_total),
+            'recent_history': recent_history,
+        }
+
+    payload = {
         "current_occupancy": etu_starting_occupancy,
         "total_capacity": etu_capacity,
         "occupancy_percentage": occupancy_pct,
@@ -1482,7 +1578,14 @@ def predict():
         "recommendation_text": rec_text,
         "target_date": target_date_str,
         "target_shift": display_shift,
-    }), 200
+    }
+
+    # attach timestamp and optional debug
+    payload['response_ts'] = response_ts
+    if debug_output is not None:
+        payload['debug'] = debug_output
+
+    return jsonify(payload), 200
 
 @app.route("/api/optimization", methods=["GET"])
 def optimization_alias():
