@@ -29,7 +29,7 @@ const Ward_A_NurseDailyInput = () => {
   // Ward ID should match backend convention (use dash-separated form)
   const wardInfo = {
     id: "WARD-A",
-    name: "Ward A (Male)",
+    name: "Male Ward",
     icon: Stethoscope,
     color: "#2563eb",
   };

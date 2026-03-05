@@ -5,7 +5,7 @@ const sampleEquipment = [
   { id: 1, name: "Gloves (Medium)", category: "Consumables", qty: 3, expiry: "2025-05-15", location: "ER" },
   { id: 2, name: "Gauze", category: "Consumables", qty: 6, expiry: "2026-02-01", location: "Stock Room" },
   { id: 3, name: "Thermometer", category: "Diagnostic", qty: 12, expiry: "—", location: "OPD" },
-  { id: 4, name: "BP Monitor", category: "Diagnostic", qty: 2, expiry: "—", location: "Ward B" },
+  { id: 4, name: "BP Monitor", category: "Diagnostic", qty: 2, expiry: "—", location: "Female Ward" },
   { id: 5, name: "Syringes", category: "Consumables", qty: 25, expiry: "2027-09-01", location: "Stock Room" },
 ];
 

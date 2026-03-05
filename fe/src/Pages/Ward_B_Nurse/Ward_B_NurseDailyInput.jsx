@@ -29,7 +29,7 @@ const Ward_B_NurseDailyInput = () => {
   });
 
   // --- WARD CONFIGURATION (Ward B ONLY) ---
-  const wardInfo = { id: 'WARD-B', name: 'Ward B (Female)', icon: Bed, color: '#ec4899' };
+  const wardInfo = { id: 'WARD-B', name: 'Female Ward', icon: Bed, color: '#ec4899' };
 
   // --- 1. FETCH LATEST SURGE STATUS ON MOUNT ---
   const fetchSurgeStatus = async () => {
@@ -96,7 +96,7 @@ const Ward_B_NurseDailyInput = () => {
       {/* --- HEADER --- */}
       <div style={{ marginBottom: 40 }}>
         <h1 style={{ fontSize: 32, fontWeight: 800, color: '#0f172a', margin: 0 }}>Daily Census & Surge Entry</h1>
-        <p style={{ color: '#64748b', marginTop: 8 }}>Input daily shift data and manage surge capacity for Ward B.</p>
+        <p style={{ color: '#64748b', marginTop: 8 }}>Input daily shift data and manage surge capacity for Female Ward.</p>
       </div>
 
       {/* --- CARDS GRID --- */}

@@ -45,7 +45,7 @@ const medicineAlerts = [
 
 const equipmentAlerts = [
   { name: "Gloves", issue: "Low stock", qty: 3, severity: "warning" },
-  { name: "BP Monitor (Ward B)", issue: "Needs calibration", severity: "info" },
+  { name: "BP Monitor (Female Ward)", issue: "Needs calibration", severity: "info" },
 ];
 
 const operationalAlerts = [

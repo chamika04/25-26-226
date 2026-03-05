@@ -83,6 +83,14 @@ export default function ETU_NurseApprovals() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [targetDate, targetShift]);
 
+  const wardDisplayName = (id) => {
+    if (!id) return id;
+    const up = id.toString().toUpperCase();
+    if (up === 'WARD-A' || up === 'WARD_A' || up === 'A') return 'Male Ward';
+    if (up === 'WARD-B' || up === 'WARD_B' || up === 'B') return 'Female Ward';
+    return id;
+  };
+
   // Build per-ward status from the TransferCount audit logs (single source of truth).
   // If no logs are available for the selected shift/date, fall back to the summary.per_ward
   // only as a compatibility measure.
@@ -228,7 +236,7 @@ export default function ETU_NurseApprovals() {
             {pendingWardNames.length > 0 && (
               <div className="mt-3 flex flex-wrap gap-2">
                 {pendingWardNames.map((n) => (
-                  <span key={n} className="inline-flex items-center gap-1 px-2 py-1 bg-amber-50 text-amber-800 rounded-full text-sm font-semibold border border-amber-100">{n}</span>
+                  <span key={n} className="inline-flex items-center gap-1 px-2 py-1 bg-amber-50 text-amber-800 rounded-full text-sm font-semibold border border-amber-100">{wardDisplayName(n)}</span>
                 ))}
               </div>
             )}
@@ -257,7 +265,7 @@ export default function ETU_NurseApprovals() {
             >
               <div className="flex justify-between items-start mb-4">
                 <div>
-                  <h4 className="text-lg font-black text-slate-800 uppercase tracking-wide">{r.ward_id}</h4>
+                  <h4 className="text-lg font-black text-slate-800 uppercase tracking-wide">{wardDisplayName(r.ward_id)}</h4>
                   <p className="text-xs font-semibold text-slate-500 mt-1 uppercase">Suggested Transfer</p>
                   <p className="text-4xl font-black text-slate-900 mt-1">{r.suggested_number ?? '0'}</p>
                 </div>
@@ -325,7 +333,7 @@ export default function ETU_NurseApprovals() {
               <tbody className="divide-y divide-slate-100">
                 {displayedTransferLogs.map((t, i) => (
                   <tr key={i} className="hover:bg-slate-50 transition-colors">
-                    <td className="p-4 font-bold text-slate-900 uppercase">{t.ward_id}</td>
+                    <td className="p-4 font-bold text-slate-900 uppercase">{wardDisplayName(t.ward_id)}</td>
                     <td className="p-4">
                       {(t.suggested_number === 0 || t.approved === false) ? (
                         <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-red-100 text-red-700 rounded font-bold text-xs">

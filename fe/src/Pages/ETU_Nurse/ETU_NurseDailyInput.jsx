@@ -94,7 +94,10 @@ const DailyInputModal = ({ ward, onClose }) => {
   const [shift, setShift] = useState('Morning (A)'); 
   
   const [data, setData] = useState({ 
+    // keep legacy total but capture gender split for ETU
     admissions: 0, 
+    admissions_male: 0,
+    admissions_female: 0,
     discharges: 0, 
     transfersOut: 0, 
     deaths: 0,
@@ -141,23 +144,32 @@ const DailyInputModal = ({ ward, onClose }) => {
       const payload = {
         Date: date,
         Shift_ID: shift,
-        Ward_ID: ward.id,       
+        Ward_ID: ward.id,
         Ward_Name: ward.name,
         
-        [isETU ? 'ETU_Admissions' : 'Admissions']: data.admissions,
-        [isETU ? 'ETU_Discharges' : 'Discharges']: data.discharges,
-        [isETU ? 'ETU_OccupiedBeds' : 'OccupiedBeds']: data.occupied,
-        
-        transfersOut: data.transfersOut,       
-        deaths: data.deaths,                   
-        Weather: 'Sunny',       
+        // ETU-specific gender split + total
+        ...(isETU ? {
+          ETU_Admissions_Male: data.admissions_male,
+          ETU_Admissions_Female: data.admissions_female,
+          ETU_Admissions: (Number(data.admissions_male) || 0) + (Number(data.admissions_female) || 0),
+          ETU_Discharges: data.discharges,
+          ETU_OccupiedBeds: data.occupied,
+        } : {
+          Admissions: data.admissions,
+          Discharges: data.discharges,
+          OccupiedBeds: data.occupied,
+        }),
+
+        transfersOut: data.transfersOut,
+        deaths: data.deaths,
+        Weather: 'Sunny',
         SpecialEvent: 'None',
         IsHoliday: 'No',
-        DayOfWeek: dayName, 
+        DayOfWeek: dayName,
         PublicTransportStatus: 'Normal',
         OutbreakAlert: 'No',
-        
-        [isETU ? 'ETU_BedCapacity' : 'BedCapacity']: wardCapacity 
+
+        ...(isETU ? { ETU_BedCapacity: wardCapacity } : { BedCapacity: wardCapacity })
       };
 
       const response = await fetch('http://localhost:5001/api/add-record', {
@@ -236,8 +248,9 @@ const DailyInputModal = ({ ward, onClose }) => {
 
           {/* Inputs Grid */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16 }}>
-            {/* Row 1 */}
-            <InputCard label="New Arrivals" value={data.admissions} onChange={(v) => updateField('admissions', v)} />
+            {/* Row 1: split arrivals by gender for ETU */}
+            <InputCard label="New Arrivals (Male)" value={data.admissions_male} onChange={(v) => updateField('admissions_male', v)} />
+            <InputCard label="New Arrivals (Female)" value={data.admissions_female} onChange={(v) => updateField('admissions_female', v)} />
             <InputCard label="Discharges" value={data.discharges} onChange={(v) => updateField('discharges', v)} />
             <InputCard label="Transfers Out" value={data.transfersOut} onChange={(v) => updateField('transfersOut', v)} />
             

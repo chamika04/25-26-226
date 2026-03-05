@@ -244,7 +244,7 @@ const Ward_A_NurseDashboard = () => {
     <div style={styles.container}>
       <header style={styles.header}>
         <div>
-          <h1 style={styles.title}>Ward A (Male) Command Center</h1>
+          <h1 style={styles.title}>Male Ward Command Center</h1>
           <p style={{ color: '#64748b', fontSize: '15px' }}>AI-Driven Inflow Monitoring</p>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: 10, marginTop: 8 }}>
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '8px 14px', borderRadius: 999, background: '#ffffff', border: '1px solid #dbeafe', boxShadow: '0 1px 2px rgba(16,24,40,0.03)' }}>
@@ -256,7 +256,7 @@ const Ward_A_NurseDashboard = () => {
         {editModalOpen && (
           <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 60 }}>
             <div style={{ width: 420, background: 'white', borderRadius: 12, padding: 20, boxShadow: '0 10px 30px rgba(0,0,0,0.2)' }}>
-              <h3 style={{ marginTop: 0 }}>Edit Approval — WARD-A</h3>
+              <h3 style={{ marginTop: 0 }}>Edit Approval — Male Ward</h3>
               <label style={{ display: 'block', marginBottom: 8, color: '#374151' }}>Suggested number</label>
               <input type="number" value={editForm.suggested_number ?? ''} onChange={(e) => setEditForm({ ...editForm, suggested_number: e.target.value })} style={{ width: '100%', padding: 8, borderRadius: 8, border: '1px solid #e5e7eb', marginBottom: 12 }} />
               <label style={{ display: 'block', marginBottom: 8, color: '#374151' }}>Approved</label>
@@ -353,7 +353,7 @@ const Ward_A_NurseDashboard = () => {
             ) : (
               <div style={{ textAlign: 'center', padding: '32px', color: '#15803d' }}>
                 <CheckCircle2 size={32} style={{ margin: '0 auto 12px' }} />
-                <p>Ward A (Male) is currently optimized. No transfers required.</p>
+                <p>Male Ward is currently optimized. No transfers required.</p>
               </div>
             )}
           </div>

@@ -27,7 +27,7 @@ const samplePrescriptions = [
     items: [{ name: "Saline 500ml", qty: 2 }],
     date: "2026-01-03",
     status: "Dispensed",
-    notes: "Given at ward B.",
+    notes: "Given at Female Ward.",
   },
 ];
 
