@@ -15,13 +15,15 @@ import {
 const ETU_HeadDashboard = () => {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [lastTs, setLastTs] = useState(null);
 
   // --- SAFE FETCH REAL DATA FROM PYTHON BACKEND ---
   useEffect(() => {
-    const load = async () => {
+    const load = async (force = false) => {
       try {
         setLoading(true);
-        const res = await fetch("http://localhost:5001/predict");
+        const url = `http://localhost:5001/predict${force ? '?force=1' : ''}`;
+        const res = await fetch(url);
 
         // handle HTTP errors safely
         if (!res.ok) {
@@ -38,6 +40,14 @@ const ETU_HeadDashboard = () => {
           throw new Error("Backend returned non-JSON response");
         }
 
+        // Only update if response_ts changed
+        if (jsonData && jsonData.response_ts) {
+          if (jsonData.response_ts === lastTs) {
+            setLoading(false);
+            return;
+          }
+          setLastTs(jsonData.response_ts);
+        }
         console.log("Dashboard Data Received:", jsonData);
         setData(jsonData);
       } catch (err) {
@@ -51,7 +61,7 @@ const ETU_HeadDashboard = () => {
     load();
 
     // OPTIONAL: refresh every 60 seconds
-    const id = setInterval(load, 60000);
+    const id = setInterval(() => load(false), 60000);
     return () => clearInterval(id);
   }, []);
 

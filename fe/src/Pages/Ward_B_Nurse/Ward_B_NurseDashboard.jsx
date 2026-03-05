@@ -26,6 +26,7 @@ const Ward_B_NurseDashboard = () => {
   const [incomingSurgeCount, setIncomingSurgeCount] = useState(0); // Surge area beds
   const [loadingAI, setLoadingAI] = useState(true);
   const [loadingStats, setLoadingStats] = useState(true);
+  const [lastTs, setLastTs] = useState(null);
   const [predTargetDate, setPredTargetDate] = useState(null);
   const [predTargetShift, setPredTargetShift] = useState(null);
   const [actionMsg, setActionMsg] = useState(null);
@@ -74,12 +75,20 @@ const Ward_B_NurseDashboard = () => {
 
   // --- 2. FETCH AI OPTIMIZATION PLAN (WARD + SURGE BREAKDOWN) ---
   useEffect(() => {
-    const fetchAIPlan = async () => {
+    const fetchAIPlan = async (force = false) => {
       try {
         setLoadingAI(true);
-        const res = await fetch('http://localhost:5001/predict'); 
+        const url = `http://localhost:5001/predict${force ? '?force=1' : ''}`;
+        const res = await fetch(url);
         if (res.ok) {
           const data = await res.json();
+          if (data && data.response_ts) {
+            if (data.response_ts === lastTs) {
+              setLoadingAI(false);
+              return;
+            }
+            setLastTs(data.response_ts);
+          }
           setPredTargetDate(data.target_date || null);
           setPredTargetShift(data.target_shift || null);
           // Prefer gender-aware optimization payload, fall back to older keys

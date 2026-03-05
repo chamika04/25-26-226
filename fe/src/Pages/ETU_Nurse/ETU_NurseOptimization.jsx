@@ -16,14 +16,23 @@ const ETU_NurseOptimization = () => {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [lastTs, setLastTs] = useState(null);
 
   // --- FETCH DATA ---
-  const fetchOptimization = async () => {
+  const fetchOptimization = async (force = false) => {
     try {
       setLoading(true);
-      const response = await fetch("http://localhost:5001/predict");
+      const url = `http://localhost:5001/predict${force ? '?force=1' : ''}`;
+      const response = await fetch(url);
       if (!response.ok) throw new Error("Server connection failed");
       const result = await response.json();
+      if (result && result.response_ts) {
+        if (result.response_ts === lastTs) {
+          setLoading(false);
+          return;
+        }
+        setLastTs(result.response_ts);
+      }
       setData(result);
       setError(false);
     } catch (err) {
@@ -38,7 +47,7 @@ const ETU_NurseOptimization = () => {
     fetchOptimization();
 
     // OPTIONAL: auto-refresh every 60 seconds
-    const id = setInterval(fetchOptimization, 60000);
+    const id = setInterval(() => fetchOptimization(false), 60000);
     return () => clearInterval(id);
   }, []);
 
@@ -60,7 +69,7 @@ const ETU_NurseOptimization = () => {
         <AlertTriangle size={64} className="mb-4 text-red-500 opacity-80" />
         <h2 className="text-2xl font-bold">Optimization Engine Offline</h2>
         <button
-          onClick={fetchOptimization}
+          onClick={() => fetchOptimization(true)}
           className="mt-6 px-8 py-3 bg-red-600 text-white rounded-xl font-semibold shadow-lg hover:bg-red-700 transition"
         >
           Retry Connection
