@@ -87,7 +87,7 @@ export default function ETU_NurseApprovals() {
   // If no logs are available for the selected shift/date, fall back to the summary.per_ward
   // only as a compatibility measure.
   const perWardRows = () => {
-    const wards = ["GEN", "WARD-A", "WARD-B"];
+    const wards = ["WARD-A", "WARD-B"];
 
     // If we have transfer logs for this shift/date, use them to determine latest per-ward status
     if (Array.isArray(transferLogs) && transferLogs.length > 0) {
@@ -123,7 +123,7 @@ export default function ETU_NurseApprovals() {
 
     // Fallback: use the summary.per_ward (older behavior)
     if (summary && summary.per_ward) {
-      return ["GEN", "WARD-A", "WARD-B"].map((w) => {
+      return ["WARD-A", "WARD-B"].map((w) => {
         const v = summary.per_ward[w] || {};
         return {
           ward_id: w,
@@ -137,7 +137,7 @@ export default function ETU_NurseApprovals() {
     }
 
     // Default empty rows
-    return ["GEN", "WARD-A", "WARD-B"].map((w) => ({ ward_id: w, approved: false, suggested_number: null, reason: null, nurse_id: null, updated_at: null }));
+    return ["WARD-A", "WARD-B"].map((w) => ({ ward_id: w, approved: false, suggested_number: null, reason: null, nurse_id: null, updated_at: null }));
   };
 
   // Filter to show only meaningful DB rows
