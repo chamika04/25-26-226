@@ -23,9 +23,8 @@ const ETU_NurseInventory = () => {
   // --- 1. CONFIGURATION: ALL WARDS ---
   const wardConfig = [
     { id: 'ETU', name: 'Emergency Treatment Unit', icon: Activity, color: '#ef4444' },
-    { id: 'WARD-A', name: 'Ward A (Medical)', icon: Stethoscope, color: '#3b82f6' },
-    { id: 'WARD-B', name: 'Ward B (Surgical)', icon: Bed, color: '#10b981' },
-    { id: 'GEN', name: 'General Ward', icon: Users, color: '#f59e0b' }
+    { id: 'WARD-A', name: 'Ward A (Male)', icon: Stethoscope, color: '#2563eb' },
+    { id: 'WARD-B', name: 'Ward B (Female)', icon: Bed, color: '#ec4899' }
   ];
 
   // --- 2. FETCH REAL DATA FROM DB ---
