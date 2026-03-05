@@ -23,26 +23,68 @@ const ETU_BedTrend = () => {
     setLoading(true);
 
     // 1. Fetch Chart Data (Latest 10 Shifts)
-    fetch('http://localhost:5001/api/get-trend-data')
-      .then((res) => res.json())
-      .then((data) => {
-        console.log("Trend Data:", data);
-        setChartData(data);
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error("Chart Error:", err);
-        setLoading(false);
-      });
+    (async () => {
+      try {
+        const resp = await fetch('http://localhost:5001/api/get-trend-data');
+        const payload = await resp.json();
+        // API may return an error object
+        if (!resp.ok || !Array.isArray(payload)) {
+          console.warn('Unexpected trend payload', payload);
+          setChartData([]);
+        } else {
+          // Normalize entries to ensure keys exist. Prefer total predicted (male+female) when provided.
+          const normalized = payload.map((d) => {
+            const observed = d.Observed != null ? Number(d.Observed) : null;
+            // backend may provide several prediction shapes: `Predicted`, `PredictedTotal`, `predicted_arrivals`,
+            // or per-gender values like `pred_male`/`pred_female` or `PredictedMale`/`PredictedFemale`.
+            let predicted = null;
+            if (d.Predicted != null) predicted = Number(d.Predicted);
+            if (d.PredictedTotal != null) predicted = Number(d.PredictedTotal);
+            if (predicted === null && d.predicted_arrivals != null) predicted = Number(d.predicted_arrivals);
+            // per-gender fields
+            const male = d.pred_male != null ? Number(d.pred_male) : (d.PredictedMale != null ? Number(d.PredictedMale) : null);
+            const female = d.pred_female != null ? Number(d.pred_female) : (d.PredictedFemale != null ? Number(d.PredictedFemale) : null);
+            if (predicted === null && male != null && female != null) predicted = male + female;
 
-    // 2. Fetch Capacity for Reference Line
-    fetch('http://localhost:5001/api/get-beds')
-      .then(res => res.json())
-      .then(beds => {
-        const etuCap = beds.filter(b => b.ward_id === 'ETU' && b.status === 'Functional').length;
-        if (etuCap > 0) setCapacity(etuCap);
-      })
-      .catch(e => console.error(e));
+            return {
+              name: d.name || '',
+              Observed: observed,
+              Predicted: predicted,
+              PredictedMale: male,
+              PredictedFemale: female,
+              PredictedTotal: predicted != null ? predicted : (male != null && female != null ? male + female : null),
+            };
+          });
+          setChartData(normalized);
+        }
+      } catch (err) {
+        console.error('Chart Error:', err);
+        setChartData([]);
+      } finally {
+        setLoading(false);
+      }
+    })();
+
+    // 2. Fetch Capacity for Reference Line using ward-status API
+    (async () => {
+      try {
+        const r = await fetch('http://localhost:5001/api/ward-status/ETU');
+        if (r.ok) {
+          const js = await r.json();
+          if (js && typeof js.capacity === 'number') setCapacity(js.capacity);
+        } else {
+          // fallback to bed list if ward-status unavailable
+          const bedsResp = await fetch('http://localhost:5001/api/get-beds');
+          if (bedsResp.ok) {
+            const beds = await bedsResp.json();
+            const etuCap = (beds || []).filter(b => (b.ward_id || '').toUpperCase() === 'ETU' && b.status === 'Functional').length;
+            if (etuCap > 0) setCapacity(etuCap);
+          }
+        }
+      } catch (e) {
+        console.error('Capacity fetch error', e);
+      }
+    })();
 
   }, []);
 
@@ -54,6 +96,8 @@ const ETU_BedTrend = () => {
       </div>
     </div>
   );
+
+  const hasNumeric = Array.isArray(chartData) && chartData.some(d => (d && (typeof d.Observed === 'number' || typeof d.PredictedTotal === 'number' || typeof d.Predicted === 'number')));
 
   return (
     <div className={styles.container}>
@@ -79,6 +123,14 @@ const ETU_BedTrend = () => {
             </span>
           </div>
           <div className={styles.chartWrap}>
+            { !hasNumeric ? (
+              <div style={{padding:40,display:'flex',alignItems:'center',justifyContent:'center',height:'100%',color:'#64748b'}}>
+                <div style={{textAlign:'center'}}>
+                  <p style={{fontSize:16, marginBottom:8}}>No trend data available</p>
+                  <p style={{margin:0}}>We couldn't find recent observations or predictions to display.</p>
+                </div>
+              </div>
+            ) : (
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={chartData} margin={{ top: 10, right: 24, left: 0, bottom: 6 }}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e6eef6" />
@@ -114,20 +166,21 @@ const ETU_BedTrend = () => {
                   connectNulls={true}
                 />
 
-                {/* 2. AI DATA (Orange Dashed Line) */}
+                {/* 2. AI DATA (Orange Dashed Line) — use PredictedTotal when available */}
                 <Line 
                   type="monotone" 
-                  dataKey="Predicted" 
+                  dataKey="PredictedTotal" 
                   stroke="#f97316" 
                   strokeWidth={2} 
                   strokeDasharray="5 5" // Dashed line to show it is a prediction/model
                   dot={{ r: 3, fill: '#f97316' }} 
-                  name="AI Prediction"
+                  name="AI Prediction (total)"
                   connectNulls={true}
                 />
 
               </LineChart>
             </ResponsiveContainer>
+            )}
           </div>
         </section>
 
