@@ -82,13 +82,21 @@ const Ward_B_NurseDashboard = () => {
           const data = await res.json();
           setPredTargetDate(data.target_date || null);
           setPredTargetShift(data.target_shift || null);
-          // Handling regular transfers for Ward B
-          if (data.action_plan_transfers) {
-            setIncomingWardCount(data.action_plan_transfers.ward_b || 0);
-          }
-          // Handling surge breakdown for Ward B
-          if (data.action_plan_surge_breakdown) {
-            setIncomingSurgeCount(data.action_plan_surge_breakdown.ward_b || 0);
+          // Prefer gender-aware optimization payload, fall back to older keys
+          try {
+            if (data.optimization_plan_gender && data.optimization_plan_gender.female) {
+              const femalePlan = data.optimization_plan_gender.female;
+              setIncomingWardCount(femalePlan.female_ward ?? 0);
+              setIncomingSurgeCount(femalePlan.female_ward_surge ?? 0);
+            } else if (data.action_plan_transfers || data.action_plan_surge_breakdown) {
+              setIncomingWardCount((data.action_plan_transfers && (data.action_plan_transfers.ward_b ?? data.action_plan_transfers.wardB)) || 0);
+              setIncomingSurgeCount((data.action_plan_surge_breakdown && (data.action_plan_surge_breakdown.ward_b ?? data.action_plan_surge_breakdown.wardB)) || 0);
+            } else if (typeof data.predicted_arrivals_female !== 'undefined') {
+              setIncomingWardCount(Number(data.predicted_arrivals_female) || 0);
+              setIncomingSurgeCount(0);
+            }
+          } catch (e) {
+            console.error('Failed to parse AI plan for female ward', e);
           }
         }
       } catch (err) {
@@ -246,7 +254,7 @@ const Ward_B_NurseDashboard = () => {
     <div style={styles.container}>
       <header style={styles.header}>
         <div>
-          <h1 style={styles.title}>Ward B Command Center</h1>
+          <h1 style={styles.title}>Ward B (Female) Command Center</h1>
           <p style={{ color: '#64748b', fontSize: '15px' }}>Surgical Ward Allocation Monitoring</p>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: 10, marginTop: 8 }}>
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '8px 14px', borderRadius: 999, background: '#ffffff', border: '1px solid #dbeafe', boxShadow: '0 1px 2px rgba(16,24,40,0.03)' }}>
@@ -355,7 +363,7 @@ const Ward_B_NurseDashboard = () => {
             ) : (
               <div style={{ textAlign: 'center', padding: '32px', color: '#15803d' }}>
                 <CheckCircle2 size={32} style={{ margin: '0 auto 12px' }} />
-                <p>Ward B is currently optimized. No transfers required.</p>
+                <p>Ward B (Female) is currently optimized. No transfers required.</p>
               </div>
             )}
           </div>
