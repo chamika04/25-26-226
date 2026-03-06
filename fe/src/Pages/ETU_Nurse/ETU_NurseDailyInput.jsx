@@ -11,22 +11,18 @@ import {
 } from 'lucide-react';
 
 const ETU_NurseDailyInput = () => {
-  const [selectedWard, setSelectedWard] = useState(null); // Standard Census Modal
+  const [selectedWard, setSelectedWard] = useState(null);
 
   // --- WARD CONFIGURATION (ETU ONLY) ---
   const wardInfo = { id: 'ETU', name: 'Emergency Treatment Unit', icon: Activity, color: '#ef4444' };
-
-  // no surge fetching for ETU (ETU does not use surge beds)
-
-  // ETU does not manage surge beds; no save helper
 
   return (
     <div style={{ padding: 40, fontFamily: 'Inter, sans-serif', background: '#f8fafc', minHeight: '100vh' }}>
       
       {/* --- HEADER --- */}
       <div style={{ marginBottom: 40 }}>
-        <h1 style={{ fontSize: 32, fontWeight: 800, color: '#0f172a', margin: 0 }}>Daily Census & Surge Entry</h1>
-        <p style={{ color: '#64748b', marginTop: 8 }}>Input daily shift data for ETU.</p>
+        <h1 style={{ fontSize: 32, fontWeight: 800, color: '#0f172a', margin: 0 }}>Daily Census Entry</h1>
+        <p style={{ color: '#64748b', marginTop: 8 }}>Input detailed daily shift data by gender for the ETU.</p>
       </div>
 
       {/* --- CARDS GRID --- */}
@@ -56,7 +52,7 @@ const ETU_NurseDailyInput = () => {
             </div>
           </div>
           <h3 style={{ fontSize: 18, fontWeight: 700, color: '#1e293b', marginBottom: 4 }}>{wardInfo.name}</h3>
-          <p style={{ fontSize: 13, color: '#64748b' }}>Daily Admissions & Discharges</p>
+          <p style={{ fontSize: 13, color: '#64748b' }}>Detailed Gender Admissions & Discharges</p>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 24, fontSize: 12, fontWeight: 600, color: '#94a3b8' }}>
             <span>Census Entry</span>
             <span style={{ display: 'flex', alignItems: 'center', gap: 4, color: wardInfo.color }}>
@@ -65,8 +61,6 @@ const ETU_NurseDailyInput = () => {
           </div>
         </div>
 
-        {/* ETU does not support surge beds; surge UI removed */}
-
       </div>
 
       {/* --- MODAL 1: DAILY CENSUS INPUT --- */}
@@ -74,16 +68,13 @@ const ETU_NurseDailyInput = () => {
         <DailyInputModal ward={selectedWard} onClose={() => setSelectedWard(null)} />
       )}
 
-      {/* no surge modal for ETU */}
-
     </div>
   );
 };
 
-// (Surge UI removed for ETU)
 
 // ==============================================
-// SUB-COMPONENT: DAILY INPUT MODAL (ORIGINAL)
+// SUB-COMPONENT: DAILY INPUT MODAL
 // ==============================================
 const DailyInputModal = ({ ward, onClose }) => {
   const [loading, setLoading] = useState(false);
@@ -94,14 +85,16 @@ const DailyInputModal = ({ ward, onClose }) => {
   const [shift, setShift] = useState('Morning (A)'); 
   
   const [data, setData] = useState({ 
-    // keep legacy total but capture gender split for ETU
-    admissions: 0, 
     admissions_male: 0,
     admissions_female: 0,
-    discharges: 0, 
-    transfersOut: 0, 
-    deaths: 0,
-    occupied: 0 
+    discharges_male: 0,
+    discharges_female: 0,
+    transfersOut_male: 0,
+    transfersOut_female: 0,
+    deaths_male: 0,
+    deaths_female: 0,
+    occupied_male: 0,
+    occupied_female: 0
   });
 
   // --- FETCH CAPACITY ---
@@ -112,7 +105,6 @@ const DailyInputModal = ({ ward, onClose }) => {
         const response = await fetch('http://localhost:5001/api/get-beds');
         if (response.ok) {
           const allBeds = await response.json();
-          // Filter specifically for the selected ward (ETU)
           const functionalBeds = allBeds.filter(b => b.ward_id === ward.id && b.status === 'Functional');
           setWardCapacity(functionalBeds.length);
         } else {
@@ -141,27 +133,45 @@ const DailyInputModal = ({ ward, onClose }) => {
       const dayName = new Date(date).toLocaleDateString('en-US', { weekday: 'long' });
       const isETU = ward.id === 'ETU'; 
 
+      // Calculate Totals dynamically so the AI models don't break
+      const totalAdmissions = data.admissions_male + data.admissions_female;
+      const totalDischarges = data.discharges_male + data.discharges_female;
+      const totalTransfers = data.transfersOut_male + data.transfersOut_female;
+      const totalDeaths = data.deaths_male + data.deaths_female;
+      const totalOccupied = data.occupied_male + data.occupied_female;
+
       const payload = {
         Date: date,
         Shift_ID: shift,
         Ward_ID: ward.id,
         Ward_Name: ward.name,
         
-        // ETU-specific gender split + total
         ...(isETU ? {
           ETU_Admissions_Male: data.admissions_male,
           ETU_Admissions_Female: data.admissions_female,
-          ETU_Admissions: (Number(data.admissions_male) || 0) + (Number(data.admissions_female) || 0),
-          ETU_Discharges: data.discharges,
-          ETU_OccupiedBeds: data.occupied,
+          ETU_Admissions: totalAdmissions, 
+          
+          ETU_Discharges_Male: data.discharges_male,
+          ETU_Discharges_Female: data.discharges_female,
+          ETU_Discharges: totalDischarges, 
+
+          ETU_OccupiedBeds_Male: data.occupied_male,
+          ETU_OccupiedBeds_Female: data.occupied_female,
+          ETU_OccupiedBeds: totalOccupied, 
         } : {
-          Admissions: data.admissions,
-          Discharges: data.discharges,
-          OccupiedBeds: data.occupied,
+          Admissions: totalAdmissions,
+          Discharges: totalDischarges,
+          OccupiedBeds: totalOccupied,
         }),
 
-        transfersOut: data.transfersOut,
-        deaths: data.deaths,
+        transfersOut_Male: data.transfersOut_male,
+        transfersOut_Female: data.transfersOut_female,
+        transfersOut: totalTransfers,
+
+        deaths_Male: data.deaths_male,
+        deaths_Female: data.deaths_female,
+        deaths: totalDeaths,
+
         Weather: 'Sunny',
         SpecialEvent: 'None',
         IsHoliday: 'No',
@@ -192,18 +202,21 @@ const DailyInputModal = ({ ward, onClose }) => {
     setLoading(false);
   };
 
+  const totalOccupiedPreview = data.occupied_male + data.occupied_female;
+
   return (
-    <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(15, 23, 42, 0.6)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50 }}>
-      <div style={{ background: 'white', width: '90%', maxWidth: 600, borderRadius: 24, boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+    <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(15, 23, 42, 0.6)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50, padding: 20 }}>
+      {/* Increased max-width to 800px to perfectly accommodate the side-by-side grid */}
+      <div style={{ background: 'white', width: '100%', maxWidth: 800, borderRadius: 24, boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)', display: 'flex', flexDirection: 'column', maxHeight: '90vh', overflow: 'hidden' }}>
         
         {/* Modal Header */}
         <div style={{ padding: '24px 32px', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f8fafc' }}>
           <div>
             <h2 style={{ fontSize: 20, fontWeight: 800, color: '#0f172a', margin: 0 }}>{ward.name}</h2>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 4 }}>
-              <p style={{ margin: 0, color: '#64748b', fontSize: 14 }}>Daily Data Entry</p>
+              <p style={{ margin: 0, color: '#64748b', fontSize: 14 }}>Detailed Gender Split Entry</p>
               {!fetchingCapacity && (
-                <span style={{ fontSize: 12, fontWeight: 600, color: '#0f172a', background: '#e2e8f0', padding: '2px 8px', borderRadius: 99 }}>
+                <span style={{ fontSize: 12, fontWeight: 700, color: '#0f172a', background: '#e2e8f0', padding: '4px 10px', borderRadius: 99 }}>
                   Capacity: {wardCapacity} Beds
                 </span>
               )}
@@ -214,110 +227,147 @@ const DailyInputModal = ({ ward, onClose }) => {
           </button>
         </div>
 
-        {/* Form Content */}
-        <form onSubmit={handleSubmit} style={{ padding: 32 }}>
-          
-          {/* Date & Shift Row */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 24 }}>
-            <div>
-              <label style={{ fontSize: 13, fontWeight: 600, color: '#475569', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
-                <Calendar size={14} /> Date
-              </label>
-              <input 
-                type="date" 
-                value={date} 
-                onChange={(e) => setDate(e.target.value)} 
-                style={{ width: '100%', padding: '10px', borderRadius: 10, border: '1px solid #cbd5e1', outline: 'none', color: '#1e293b' }} 
+        {/* Form Content - Scrollable */}
+        <div style={{ overflowY: 'auto', padding: 32 }}>
+          <form onSubmit={handleSubmit}>
+            
+            {/* Date & Shift Row */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, marginBottom: 24 }}>
+              <div>
+                <label style={{ fontSize: 13, fontWeight: 600, color: '#475569', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <Calendar size={14} /> Date
+                </label>
+                <input 
+                  type="date" 
+                  value={date} 
+                  onChange={(e) => setDate(e.target.value)} 
+                  style={{ width: '100%', padding: '12px', borderRadius: 10, border: '1px solid #cbd5e1', outline: 'none', color: '#1e293b' }} 
+                />
+              </div>
+              <div>
+                <label style={{ fontSize: 13, fontWeight: 600, color: '#475569', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <Clock size={14} /> Shift
+                </label>
+                <select 
+                  value={shift} 
+                  onChange={(e) => setShift(e.target.value)} 
+                  style={{ width: '100%', padding: '12px', borderRadius: 10, border: '1px solid #cbd5e1', outline: 'none', background: 'white', color: '#1e293b' }}
+                >
+                  <option value="Morning (A)">Morning Shift</option>
+                  <option value="Evening (B)">Evening Shift</option>
+                  <option value="Night (C)">Night Shift</option>
+                </select>
+              </div>
+            </div>
+
+            {/* ✅ NEW: 2-Column Grid of Split Cards */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
+              
+              <SplitInputCard 
+                title="New Arrivals" 
+                maleValue={data.admissions_male} onMaleChange={(v) => updateField('admissions_male', v)}
+                femaleValue={data.admissions_female} onFemaleChange={(v) => updateField('admissions_female', v)}
+              />
+              
+              <SplitInputCard 
+                title="Discharges" 
+                maleValue={data.discharges_male} onMaleChange={(v) => updateField('discharges_male', v)}
+                femaleValue={data.discharges_female} onFemaleChange={(v) => updateField('discharges_female', v)}
+              />
+
+              <SplitInputCard 
+                title="Transfers Out" 
+                maleValue={data.transfersOut_male} onMaleChange={(v) => updateField('transfersOut_male', v)}
+                femaleValue={data.transfersOut_female} onFemaleChange={(v) => updateField('transfersOut_female', v)}
+              />
+              
+              <SplitInputCard 
+                title="Deaths" 
+                theme="danger"
+                maleValue={data.deaths_male} onMaleChange={(v) => updateField('deaths_male', v)}
+                femaleValue={data.deaths_female} onFemaleChange={(v) => updateField('deaths_female', v)}
               />
             </div>
-            <div>
-              <label style={{ fontSize: 13, fontWeight: 600, color: '#475569', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
-                <Clock size={14} /> Shift
-              </label>
-              <select 
-                value={shift} 
-                onChange={(e) => setShift(e.target.value)} 
-                style={{ width: '100%', padding: '10px', borderRadius: 10, border: '1px solid #cbd5e1', outline: 'none', background: 'white', color: '#1e293b' }}
+
+            {/* Occupied Beds - Full Width Span */}
+            <div style={{ marginTop: 20 }}>
+              <SplitInputCard 
+                title="Current Occupied Beds (End of Shift)" 
+                theme="success"
+                maleValue={data.occupied_male} onMaleChange={(v) => updateField('occupied_male', v)}
+                femaleValue={data.occupied_female} onFemaleChange={(v) => updateField('occupied_female', v)}
+                rightElement={
+                  totalOccupiedPreview > wardCapacity ? (
+                    <span style={{ fontSize: 12, fontWeight: 800, color: '#dc2626', display: 'flex', alignItems: 'center', gap: 6, background: '#fee2e2', padding: '4px 12px', borderRadius: 99 }}>
+                      <Info size={14} /> Over Capacity! ({totalOccupiedPreview} / {wardCapacity})
+                    </span>
+                  ) : null
+                }
+              />
+            </div>
+
+            {/* Footer Actions */}
+            <div style={{ marginTop: 32, display: 'flex', gap: 12 }}>
+              <button type="button" onClick={onClose} style={{ flex: 1, padding: '14px', borderRadius: 12, border: '1px solid #cbd5e1', background: 'white', color: '#475569', fontWeight: 700, cursor: 'pointer' }}>
+                Cancel
+              </button>
+              <button 
+                type="submit" 
+                disabled={loading || fetchingCapacity}
+                style={{ flex: 2, padding: '14px', borderRadius: 12, border: 'none', background: '#0f172a', color: 'white', fontWeight: 700, cursor: (loading || fetchingCapacity) ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}
               >
-                <option value="Morning (A)">Morning Shift</option>
-                <option value="Evening (B)">Evening Shift</option>
-                <option value="Night (C)">Night Shift</option>
-              </select>
+                {loading ? <Loader size={20} className="animate-spin" /> : <Save size={20} />}
+                {loading ? 'Saving to Database...' : (fetchingCapacity ? 'Loading Bed Capacity...' : 'Submit Final Shift Record')}
+              </button>
             </div>
-          </div>
 
-          {/* Inputs Grid */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16 }}>
-            {/* Row 1: split arrivals by gender for ETU */}
-            <InputCard label="New Arrivals (Male)" value={data.admissions_male} onChange={(v) => updateField('admissions_male', v)} />
-            <InputCard label="New Arrivals (Female)" value={data.admissions_female} onChange={(v) => updateField('admissions_female', v)} />
-            <InputCard label="Discharges" value={data.discharges} onChange={(v) => updateField('discharges', v)} />
-            <InputCard label="Transfers Out" value={data.transfersOut} onChange={(v) => updateField('transfersOut', v)} />
-            
-            {/* Row 2 */}
-            <InputCard label="Deaths" value={data.deaths} onChange={(v) => updateField('deaths', v)} isDanger />
-            
-            {/* CURRENT OCCUPANCY INPUT */}
-            <div style={{ gridColumn: 'span 2' }}>
-                <div style={{ background: '#ecfdf5', padding: 12, borderRadius: 12, border: '1px solid #d1fae5' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-                      <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#059669', textTransform: 'uppercase' }}>
-                        Current Occupied Beds
-                      </label>
-                      {/* Warning if Occupancy > Capacity */}
-                      {data.occupied > wardCapacity && (
-                        <span style={{ fontSize: 10, fontWeight: 700, color: '#dc2626', display: 'flex', alignItems: 'center', gap: 4 }}>
-                          <Info size={12} /> Over Capacity!
-                        </span>
-                      )}
-                    </div>
-                    <input 
-                      type="number" 
-                      min="0"
-                      value={data.occupied} 
-                      onChange={(e) => updateField('occupied', e.target.value)} 
-                      style={{ width: '100%', fontSize: 20, fontWeight: 700, color: '#047857', background: 'transparent', border: 'none', outline: 'none' }} 
-                    />
-                </div>
-            </div>
-          </div>
-
-          {/* Footer Actions */}
-          <div style={{ marginTop: 32, display: 'flex', gap: 12 }}>
-            <button type="button" onClick={onClose} style={{ flex: 1, padding: '12px', borderRadius: 12, border: '1px solid #cbd5e1', background: 'white', color: '#475569', fontWeight: 600, cursor: 'pointer' }}>
-              Cancel
-            </button>
-            <button 
-              type="submit" 
-              disabled={loading || fetchingCapacity}
-              style={{ flex: 2, padding: '12px', borderRadius: 12, border: 'none', background: '#0f172a', color: 'white', fontWeight: 600, cursor: (loading || fetchingCapacity) ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}
-            >
-              {loading ? <Loader size={18} className="animate-spin" /> : <Save size={18} />}
-              {loading ? 'Saving...' : (fetchingCapacity ? 'Loading Data...' : 'Submit Record')}
-            </button>
-          </div>
-
-        </form>
-
+          </form>
+        </div>
       </div>
     </div>
   );
 };
 
-// --- HELPER COMPONENT ---
-const InputCard = ({ label, value, onChange, isDanger }) => (
-  <div style={{ background: isDanger ? '#fef2f2' : '#f8fafc', padding: 12, borderRadius: 12, border: isDanger ? '1px solid #fee2e2' : '1px solid #e2e8f0' }}>
-    <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: isDanger ? '#ef4444' : '#64748b', textTransform: 'uppercase', marginBottom: 4 }}>
-      {label}
-    </label>
-    <input 
-      type="number" 
-      min="0"
-      value={value} 
-      onChange={(e) => onChange(e.target.value)} 
-      style={{ width: '100%', fontSize: 20, fontWeight: 700, color: '#0f172a', background: 'transparent', border: 'none', outline: 'none' }} 
-    />
-  </div>
-);
+// ==============================================
+// ✅ NEW HELPER COMPONENT: UI MATCHING THE IMAGE
+// ==============================================
+const SplitInputCard = ({ title, maleValue, femaleValue, onMaleChange, onFemaleChange, theme = 'default', rightElement }) => {
+  // Dynamic styling based on the context of the card
+  const themes = {
+    default: { bg: '#f8fafc', border: '#e2e8f0', title: '#0f172a', label: '#64748b', inputBorder: '#cbd5e1', inputText: '#0f172a' },
+    danger:  { bg: '#fef2f2', border: '#fecaca', title: '#dc2626', label: '#ef4444', inputBorder: '#fca5a5', inputText: '#991b1b' },
+    success: { bg: '#ecfdf5', border: '#a7f3d0', title: '#047857', label: '#059669', inputBorder: '#6ee7b7', inputText: '#064e3b' }
+  };
+  
+  const t = themes[theme];
+
+  return (
+    <div style={{ background: t.bg, padding: 20, borderRadius: 16, border: `1px solid ${t.border}` }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+        <label style={{ display: 'block', fontSize: 13, fontWeight: 800, color: t.title, textTransform: 'uppercase' }}>
+          {title}
+        </label>
+        {rightElement}
+      </div>
+      
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+        <div>
+          <label style={{ fontSize: 11, fontWeight: 700, color: t.label, marginBottom: 6, display: 'block' }}>MALE PATIENTS</label>
+          <input 
+            type="number" min="0" value={maleValue} onChange={(e) => onMaleChange(e.target.value)} 
+            style={{ width: '100%', boxSizing: 'border-box', fontSize: 24, fontWeight: 800, color: t.inputText, background: 'white', border: `1px solid ${t.inputBorder}`, borderRadius: 10, padding: '10px 16px', outline: 'none' }} 
+          />
+        </div>
+        <div>
+          <label style={{ fontSize: 11, fontWeight: 700, color: t.label, marginBottom: 6, display: 'block' }}>FEMALE PATIENTS</label>
+          <input 
+            type="number" min="0" value={femaleValue} onChange={(e) => onFemaleChange(e.target.value)} 
+            style={{ width: '100%', boxSizing: 'border-box', fontSize: 24, fontWeight: 800, color: t.inputText, background: 'white', border: `1px solid ${t.inputBorder}`, borderRadius: 10, padding: '10px 16px', outline: 'none' }} 
+          />
+        </div>
+      </div>
+    </div>
+  );
+};
 
 export default ETU_NurseDailyInput;
