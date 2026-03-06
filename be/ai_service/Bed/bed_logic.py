@@ -250,34 +250,21 @@ def fetch_etu_history():
         print(f"Database Fetch Error: {e}")
         return None
 
-def get_previous_shift_occupancy(target_date_str, target_shift):
+# ✅ NEW: Gets the absolute latest ETU record dynamically from the database
+def get_current_etu_occupancy():
     try:
-        target_date = datetime.strptime(target_date_str, "%Y-%m-%d").date()
-        if target_shift == "Morning (A)":
-            prior_date = (target_date - timedelta(days=1)).strftime("%Y-%m-%d")
-            prior_shift = "Night (C)"
-        elif target_shift == "Evening (B)":
-            prior_date = target_date.strftime("%Y-%m-%d")
-            prior_shift = "Morning (A)"
-        else:
-            prior_date = target_date.strftime("%Y-%m-%d")
-            prior_shift = "Evening (B)"
-
-        query = {
-            "$or": [{"Ward_ID": "ETU"}, {"Ward_ID": {"$exists": False}}],
-            "Date": prior_date,
-            "Shift_ID": prior_shift,
-        }
-        record = collection.find_one(query)
-
-        if record:
-            return int(record.get("ETU_OccupiedBeds", 0))
-        else:
-            fallback_query = {"$or": [{"Ward_ID": "ETU"}, {"Ward_ID": {"$exists": False}}]}
-            latest = collection.find_one(fallback_query, sort=[("Date", -1), ("_id", -1)])
-            return int(latest.get("ETU_OccupiedBeds", 0)) if latest else 0
+        query = {"$or": [{"Ward_ID": "ETU"}, {"Ward_ID": {"$exists": False}}]}
+        
+        # ✅ FIX: Sort ONLY by _id descending. 
+        # This guarantees we fetch the absolute most recently submitted nurse form,
+        # completely ignoring any accidental future dates or text typos in the "Date" field.
+        latest = collection.find_one(query, sort=[("_id", -1)])
+        
+        if latest:
+            return int(latest.get("ETU_OccupiedBeds", 0))
+        return 0
     except Exception as e:
-        print(f"⚠️ Error finding prior occupancy: {e}")
+        print(f"⚠️ Error finding current ETU occupancy: {e}")
         return 0
 
 
@@ -643,7 +630,9 @@ def predict():
     predicted_arrivals = pred_male + pred_female
 
     # D) MILP OPTIMIZATION (Gender Locked)
-    etu_starting_occupancy = get_previous_shift_occupancy(target_date_str, display_shift)
+    # ✅ UPDATED: Calls the new direct DB lookup function
+    etu_starting_occupancy = get_current_etu_occupancy()
+    
     etu_capacity = bed_inventory_collection.count_documents({"ward_id": "ETU", "status": "Functional"}) or 25
     free_etu_slots = max(0, etu_capacity - etu_starting_occupancy)
 
