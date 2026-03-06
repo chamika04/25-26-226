@@ -3,7 +3,7 @@ Bed Logic Module
 
 This file contains the Flask routes and prediction/optimization logic for the
 Hospital ETU/wards. It includes the Ensemble AI (TFT + LSTM) logic and 
-Mixed-Integer Linear Programming (MILP) for bed allocations.
+Mixed-Integer Linear Programming (MILP) for flexible bed allocations.
 """
 
 from flask import Flask, jsonify, request
@@ -87,7 +87,6 @@ def find_model_file(filename):
     for p in candidates:
         if os.path.exists(p):
             return p
-    find_model_file._last_tried = candidates
     return None
 
 # --- LOAD TFT MODEL ---
@@ -105,8 +104,7 @@ if tft_path and TemporalFusionTransformer is not None:
 elif tft_path and TemporalFusionTransformer is None:
     print("⚠️ TFT model file found but `pytorch_forecasting` is not installed; skipping load.")
 else:
-    tried = getattr(find_model_file, "_last_tried", [])
-    print(f"\n⚠️ CRITICAL ERROR: TFT MODEL FILE MISSING! searched: {tried}")
+    print("\n⚠️ CRITICAL ERROR: TFT MODEL FILE MISSING!")
 
 # --- DEFINE & LOAD LSTM MODEL ---
 lstm_filename = "hospital_lstm_model.pt"
@@ -143,8 +141,7 @@ if torch is not None and nn is not None:
         except Exception as e:
             print(f"❌ LSTM load error: {e}")
     else:
-        tried = getattr(find_model_file, "_last_tried", [])
-        print(f"\n⚠️ LSTM model or scaler not loaded. Searched: {tried}")
+        print("\n⚠️ LSTM model or scaler not loaded.")
 else:
     print("⚠️ Skipping LSTM definition — torch or nn not available.")
 
@@ -202,7 +199,7 @@ def get_surge_limit(ward_id):
 def get_ward_realtime_free_space(ward_id, occupancy_key="OccupiedBeds"):
     try:
         capacity = bed_inventory_collection.count_documents({"ward_id": ward_id, "status": "Functional"})
-        latest_record = collection.find_one({"Ward_ID": ward_id}, sort=[("Date", -1), ("_id", -1)])
+        latest_record = collection.find_one({"Ward_ID": ward_id}, sort=[("_id", -1)])
         occupancy = int(latest_record.get(occupancy_key, 0)) if latest_record else 0
         free_space = max(0, capacity - occupancy)
         return free_space, capacity
@@ -213,7 +210,7 @@ def get_ward_realtime_free_space(ward_id, occupancy_key="OccupiedBeds"):
 def fetch_etu_history():
     try:
         query = {"$or": [{"Ward_ID": "ETU"}, {"Ward_ID": {"$exists": False}}]}
-        cursor = collection.find(query).sort([("Date", 1), ("Shift_ID", 1)])
+        cursor = collection.find(query)
         df = pd.DataFrame(list(cursor))
 
         if df.empty: return None
@@ -225,7 +222,18 @@ def fetch_etu_history():
 
         today = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
         df = df[df["Date"] <= today].copy()
-        df = df.sort_values(["Date", "Shift_ID"]).reset_index(drop=True)
+        
+        def shift_to_num(s):
+            s = str(s).upper()
+            if 'A' in s or 'MORN' in s: return 1
+            if 'B' in s or 'EVEN' in s: return 2
+            if 'C' in s or 'NIGHT' in s: return 3
+            return 0
+            
+        df["Shift_Order"] = df["Shift_ID"].apply(shift_to_num)
+        df = df.sort_values(["Date", "Shift_Order"]).reset_index(drop=True)
+        df = df.drop(columns=["Shift_Order"])
+        
         df["time_idx"] = np.arange(len(df), dtype=int) 
         df["group"] = "ETU_Main"
 
@@ -250,22 +258,27 @@ def fetch_etu_history():
         print(f"Database Fetch Error: {e}")
         return None
 
-# ✅ NEW: Gets the absolute latest ETU record dynamically from the database
 def get_current_etu_occupancy():
     try:
         query = {"$or": [{"Ward_ID": "ETU"}, {"Ward_ID": {"$exists": False}}]}
-        
-        # ✅ FIX: Sort ONLY by _id descending. 
-        # This guarantees we fetch the absolute most recently submitted nurse form,
-        # completely ignoring any accidental future dates or text typos in the "Date" field.
         latest = collection.find_one(query, sort=[("_id", -1)])
         
         if latest:
-            return int(latest.get("ETU_OccupiedBeds", 0))
-        return 0
+            total_occ = int(latest.get("ETU_OccupiedBeds", 0))
+            male_occ = int(latest.get("ETU_OccupiedBeds_Male", 0))
+            female_occ = int(latest.get("ETU_OccupiedBeds_Female", 0))
+            
+            # 🔥 BULLETPROOF FALLBACK: If old DB records don't have the new male/female 
+            # inputs, we grant maximum flexibility so the MILP AI doesn't crash to 0.
+            if male_occ == 0 and female_occ == 0 and total_occ > 0:
+                male_occ = total_occ
+                female_occ = total_occ
+
+            return total_occ, male_occ, female_occ
+        return 0, 0, 0
     except Exception as e:
         print(f"⚠️ Error finding current ETU occupancy: {e}")
-        return 0
+        return 0, 0, 0
 
 
 # ==========================================
@@ -402,32 +415,48 @@ def get_transfer_count():
 @app.route("/api/get-trend-data", methods=["GET"])
 def get_trend_data():
     try:
-        obs_cursor = collection.find({"$or": [{"Ward_ID": "ETU"}, {"Ward_ID": {"$exists": False}}]}).sort([("Date", -1), ("Shift_ID", -1)]).limit(10)
+        obs_cursor = collection.find({"$or": [{"Ward_ID": "ETU"}, {"Ward_ID": {"$exists": False}}]}).sort([("_id", -1)]).limit(15)
         obs_data = list(obs_cursor)
-        pred_cursor = history_collection.find().sort([("target_date", -1), ("target_shift", -1)]).limit(10)
+
+        def shift_num(s):
+            s = str(s).upper()
+            if 'A' in s or 'MORN' in s: return 1
+            if 'B' in s or 'EVEN' in s: return 2
+            if 'C' in s or 'NIGHT' in s: return 3
+            return 0
+            
+        obs_data.sort(key=lambda x: (str(x.get("Date", "")), shift_num(x.get("Shift_ID", ""))))
+        
+        pred_cursor = history_collection.find().sort([("_id", -1)]).limit(10)
         pred_data = list(pred_cursor)
 
         merged_timeline = {}
         for doc in obs_data:
-            key = f"{doc['Date']}_{doc['Shift_ID']}"
+            raw_shift = str(doc.get('Shift_ID', ''))
+            key = f"{doc.get('Date', '')}_{raw_shift}"
+            sort_key = f"{doc.get('Date', '')}_{shift_num(raw_shift)}"
+            
             try:
                 dt = pd.to_datetime(doc["Date"])
-                label = f"{dt.strftime('%b %d')} ({str(doc['Shift_ID'])[0]})"
+                label = f"{dt.strftime('%b %d')} ({raw_shift[0]})"
             except:
-                label = f"{doc['Date']} ({doc['Shift_ID']})"
+                label = f"{doc.get('Date', '')} ({raw_shift})"
 
-            if key not in merged_timeline: merged_timeline[key] = {"name": label, "sort_key": key}
+            if key not in merged_timeline: merged_timeline[key] = {"name": label, "sort_key": sort_key}
             merged_timeline[key]["Observed"] = int(doc.get("ETU_Admissions", 0))
 
         for doc in pred_data:
-            key = f"{doc['target_date']}_{doc['target_shift']}"
+            raw_shift = str(doc.get('target_shift', ''))
+            key = f"{doc.get('target_date', '')}_{raw_shift}"
+            sort_key = f"{doc.get('target_date', '')}_{shift_num(raw_shift)}"
+            
             if key not in merged_timeline:
                 try:
                     dt = pd.to_datetime(doc["target_date"])
-                    label = f"{dt.strftime('%b %d')} ({str(doc['target_shift'])[0]})"
+                    label = f"{dt.strftime('%b %d')} ({raw_shift[0]})"
                 except:
-                    label = f"{doc['target_date']} ({doc['target_shift']})"
-                merged_timeline[key] = {"name": label, "sort_key": key}
+                    label = f"{doc.get('target_date', '')} ({raw_shift})"
+                merged_timeline[key] = {"name": label, "sort_key": sort_key}
 
             predicted_val = doc.get("predicted_arrivals") or doc.get("predicted_arrivals_total") or 0
             if not predicted_val:
@@ -469,7 +498,7 @@ def etu_approve():
             hist = history_collection.find_one({'target_date': data.get('target_date'), 'target_shift': data.get('target_shift')})
             if hist:
                 transfer_record['predicted_arrivals'] = int(hist.get('predicted_arrivals') or hist.get('predicted_arrivals_total') or 0)
-                transfer_record['optimization_plan'] = hist.get('optimization_plan') or hist.get('optimization_plan_gender') or None
+                transfer_record['optimization_plan'] = hist.get('optimization_plan') or hist.get('optimization_plan_flexible') or None
         except Exception:
             pass
 
@@ -629,54 +658,76 @@ def predict():
         pred_female = int(total_int - pred_male)
     predicted_arrivals = pred_male + pred_female
 
-    # D) MILP OPTIMIZATION (Gender Locked)
-    # ✅ UPDATED: Calls the new direct DB lookup function
-    etu_starting_occupancy = get_current_etu_occupancy()
+    # ==========================================================
+    # D) MILP OPTIMIZATION (FLEXIBLE ETU TRANSFERS)
+    # ==========================================================
+    etu_starting_occupancy, current_etu_male, current_etu_female = get_current_etu_occupancy()
     
     etu_capacity = bed_inventory_collection.count_documents({"ward_id": "ETU", "status": "Functional"}) or 25
     free_etu_slots = max(0, etu_capacity - etu_starting_occupancy)
 
     free_male, _ = get_ward_realtime_free_space("WARD-A", "OccupiedBeds")
     surge_male = get_surge_limit("WARD-A")
+    
     free_female, _ = get_ward_realtime_free_space("WARD-B", "OccupiedBeds")
     surge_female = get_surge_limit("WARD-B")
 
-    if LpProblem is not None:
-        prob = LpProblem("Hospital_Optimization_Gender", LpMinimize)
-        xKeepM = LpVariable("KeepMale_ETU", 0, free_etu_slots, cat="Integer")
-        xKeepF = LpVariable("KeepFemale_ETU", 0, free_etu_slots, cat="Integer")
-        xM = LpVariable("MaleWard", 0, free_male, cat="Integer")
-        xM_S = LpVariable("MaleWard_Surge", 0, surge_male, cat="Integer")
-        xF = LpVariable("FemaleWard", 0, free_female, cat="Integer")
-        xF_S = LpVariable("FemaleWard_Surge", 0, surge_female, cat="Integer")
-        xExtM = LpVariable("ExternalMale", 0, None, cat="Integer")
-        xExtF = LpVariable("ExternalFemale", 0, None, cat="Integer")
+    # 🔥 LIVE CONSOLE DEBUGGING FOR VIVA DEMO
+    print("\n" + "="*40)
+    print("🚀 RUNNING AI MILP OPTIMIZATION (FLEXIBLE)")
+    print(f"   📥 Predicted Arrivals: {predicted_arrivals} (M:{pred_male}, F:{pred_female})")
+    print(f"   🏥 ETU Status: {free_etu_slots} Free Beds | Patients Inside: [Male: {current_etu_male}, Female: {current_etu_female}]")
+    print(f"   🛏️ WARD A (Male)   - Free: {free_male}, Surge: {surge_male}")
+    print(f"   🛏️ WARD B (Female) - Free: {free_female}, Surge: {surge_female}")
+    print("="*40 + "\n")
 
-        prob += xKeepM + xM + xM_S + xExtM == pred_male
-        prob += xKeepF + xF + xF_S + xExtF == pred_female
-        prob += xKeepM + xKeepF <= free_etu_slots
-        prob += 1 * (xKeepM + xKeepF) + 2 * (xM + xF) + 10 * (xM_S + xF_S) + 100 * (xExtM + xExtF)
+    if LpProblem is not None:
+        prob = LpProblem("Hospital_Optimization_Flexible", LpMinimize)
+        
+        # 1. Variables
+        xKeepETU = LpVariable("Keep_ETU", 0, free_etu_slots, cat="Integer")
+        xM = LpVariable("Transfer_MaleWard", 0, free_male, cat="Integer")
+        xM_S = LpVariable("Surge_MaleWard", 0, surge_male, cat="Integer")
+        xF = LpVariable("Transfer_FemaleWard", 0, free_female, cat="Integer")
+        xF_S = LpVariable("Surge_FemaleWard", 0, surge_female, cat="Integer")
+        xExt = LpVariable("External", 0, None, cat="Integer")
+
+        # Rules: Cannot transfer more men/women than currently exist in ETU!
+        prob += (xM + xM_S) <= current_etu_male
+        prob += (xF + xF_S) <= current_etu_female
+
+        # Rule: Total arriving must be handled by finding ANY empty bed (Flexible)
+        prob += (xKeepETU + xM + xF + xM_S + xF_S + xExt) == predicted_arrivals
+        
+        # Rule: Normal Beds (cost 2) > Surge Beds (cost 10) > External (cost 100)
+        prob += 1 * xKeepETU + 2 * (xM + xF) + 10 * (xM_S + xF_S) + 100 * xExt
 
         prob.solve()
         status = LpStatus.get(prob.status, "Unknown")
         val = lambda v: int(value(v)) if value(v) is not None else 0
+        
         plan = {
-            "male": {"etu_keep": val(xKeepM), "etu_surge": 0, "male_ward": val(xM), "male_ward_surge": val(xM_S), "external": val(xExtM)},
-            "female": {"etu_keep": val(xKeepF), "etu_surge": 0, "female_ward": val(xF), "female_ward_surge": val(xF_S), "external": val(xExtF)},
+            "etu_keep": val(xKeepETU),
+            "male_ward": val(xM),
+            "male_ward_surge": val(xM_S),
+            "female_ward": val(xF),
+            "female_ward_surge": val(xF_S),
+            "external": val(xExt),
             "solver_status": status,
         }
     else:
-        plan = {"male": {}, "female": {}, "solver_status": "PuLP Not Installed"}
+        plan = {"solver_status": "PuLP Not Installed"}
 
     # E) Save Prediction
     try:
+        # Notice we are explicitly saving as optimization_plan_flexible
         history_collection.update_one(
             {"target_date": target_date_str, "target_shift": display_shift},
             {"$set": {
                 "generated_at": datetime.now(), "target_date": target_date_str, "target_shift": display_shift,
                 "predicted_arrivals_total": predicted_arrivals, "predicted_arrivals_male": pred_male, 
                 "predicted_arrivals_female": pred_female, "etu_capacity_used": etu_capacity,
-                "starting_occupancy": etu_starting_occupancy, "optimization_plan_gender": plan,
+                "starting_occupancy": etu_starting_occupancy, "optimization_plan_flexible": plan,
             }}, upsert=True
         )
     except Exception as e: print(f"⚠️ Save Warning: {e}")
@@ -684,8 +735,11 @@ def predict():
     # F) Construct JSON Response
     occupancy_pct = int((etu_starting_occupancy / etu_capacity) * 100) if etu_capacity > 0 else 100
     risk = "Critical" if predicted_arrivals > 30 else ("High" if predicted_arrivals > 15 else "Normal")
-    rec_text = "CRITICAL: Surge beds activated." if (plan["male"].get("male_ward_surge", 0) + plan["female"].get("female_ward_surge", 0)) > 0 else ("High load expected. Approve overtime." if risk == "High" else "Standard operation.")
+    
+    total_surge_used = plan.get("male_ward_surge", 0) + plan.get("female_ward_surge", 0)
+    rec_text = "CRITICAL: Surge beds activated." if total_surge_used > 0 else ("High load expected. Approve overtime." if risk == "High" else "Standard operation.")
 
+    # We send this exact JSON back to your React frontend
     payload = {
         "current_occupancy": etu_starting_occupancy,
         "total_capacity": etu_capacity,
@@ -705,17 +759,28 @@ def predict():
             "min_total": int(low_m + low_f), "max_total": int(high_m + high_f),
         }],
         "optimization_status": f"MILP {plan.get('solver_status', 'Unknown')}",
-        "optimization_plan_gender": plan,
-        "action_plan_transfers": {"ward_a": plan.get("male", {}).get("male_ward", 0), "ward_b": plan.get("female", {}).get("female_ward", 0), "general": 0},
-        "action_plan_surge": int(plan.get("male", {}).get("male_ward_surge", 0) + plan.get("female", {}).get("female_ward_surge", 0)),
-        "action_plan_surge_breakdown": {"ward_a": int(plan.get("male", {}).get("male_ward_surge", 0)), "ward_b": int(plan.get("female", {}).get("female_ward_surge", 0)), "general": 0},
-        "action_plan_external": int(plan.get("male", {}).get("external", 0) + plan.get("female", {}).get("external", 0)),
-        "action_plan_keep_etu": int(plan.get("male", {}).get("etu_keep", 0) + plan.get("female", {}).get("etu_keep", 0)),
+        "optimization_plan_flexible": plan,
+        
+        "action_plan_transfers": {
+            "ward_a": plan.get("male_ward", 0), 
+            "ward_b": plan.get("female_ward", 0), 
+            "general": 0
+        },
+        "action_plan_surge": total_surge_used,
+        "action_plan_surge_breakdown": {
+            "ward_a": plan.get("male_ward_surge", 0), 
+            "ward_b": plan.get("female_ward_surge", 0), 
+            "general": 0
+        },
+        "action_plan_external": plan.get("external", 0),
+        "action_plan_keep_etu": plan.get("etu_keep", 0),
+        
         "recommendation_text": rec_text,
         "target_date": target_date_str,
         "target_shift": display_shift,
         "response_ts": datetime.now().isoformat()
     }
+    
     return jsonify(payload), 200
 
 if __name__ == "__main__":
