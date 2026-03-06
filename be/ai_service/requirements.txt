@@ -1,0 +1,6 @@
+# Minimal dependencies required by the AI service
+flask
+flask-cors
+pandas
+pymongo
+certifi
