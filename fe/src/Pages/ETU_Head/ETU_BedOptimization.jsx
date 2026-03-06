@@ -81,9 +81,43 @@ const ETU_BedOptimization = () => {
   // --- DATA PREP (NEW BACKEND FORMAT) ---
   const forecastPeriod = data.forecast_table_rows?.[0]?.period || "Upcoming Shift";
 
-  const plan = data.optimization_plan_gender || {};
+  // Backend has shipped a couple of plan shapes during development:
+  // 1) { optimization_plan_gender: { male: {...}, female: {...}, solver_status } }
+  // 2) { optimization_plan_flexible: { male_ward, female_ward, male_ward_surge, female_ward_surge, external, solver_status } }
+  // Normalize both to a predictable `plan.male` / `plan.female` shape.
+  const rawPlan = data.optimization_plan_gender || data.optimization_plan_flexible || data.optimization_plan || {};
+
+  const normalizePlan = (raw) => {
+    if (!raw) return { male: {}, female: {}, solver_status: "OK" };
+    // Already in gendered shape
+    if (raw.male || raw.female) {
+      return {
+        male: raw.male || {},
+        female: raw.female || {},
+        solver_status: raw.solver_status || raw.solver || "OK",
+      };
+    }
+
+    // Flexible flat shape -> convert to gendered
+    return {
+      male: {
+        male_ward: raw.male_ward || raw.male || 0,
+        male_ward_surge: raw.male_ward_surge || 0,
+        external: raw.external || 0,
+      },
+      female: {
+        female_ward: raw.female_ward || raw.female || 0,
+        female_ward_surge: raw.female_ward_surge || 0,
+        external: 0,
+      },
+      solver_status: raw.solver_status || raw.solver || "OK",
+    };
+  };
+
+  const plan = normalizePlan(rawPlan);
   const male = plan.male || {};
   const female = plan.female || {};
+  const solverStatus = rawPlan?.solver_status || plan?.solver_status || "OK";
 
   const predictedTotal = data.predicted_arrivals ?? 0;
   const predictedMale = data.predicted_arrivals_male ?? 0;
@@ -131,7 +165,7 @@ const ETU_BedOptimization = () => {
             </span>
 
             <span className="hidden md:inline-flex px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-100 border border-slate-200 text-slate-600">
-              Solver: {plan.solver_status || "OK"}
+              Solver: {solverStatus}
             </span>
           </div>
         </div>
