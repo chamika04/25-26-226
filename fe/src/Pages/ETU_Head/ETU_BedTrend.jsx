@@ -31,7 +31,7 @@ const ETU_BedTrend = () => {
         if (!resp.ok || !Array.isArray(payload)) {
           console.warn('Unexpected trend payload', payload);
           setChartData([]);
-        } else {
+          } else {
           // Normalize entries to ensure keys exist. Prefer total predicted (male+female) when provided.
           const normalized = payload.map((d) => {
             const observed = d.Observed != null ? Number(d.Observed) : null;
@@ -55,7 +55,9 @@ const ETU_BedTrend = () => {
               PredictedTotal: predicted != null ? predicted : (male != null && female != null ? male + female : null),
             };
           });
-          setChartData(normalized);
+          // keep only last 10 timeline points (most recent)
+          const final = normalized.length > 10 ? normalized.slice(-10) : normalized;
+          setChartData(final);
         }
       } catch (err) {
         console.error('Chart Error:', err);
