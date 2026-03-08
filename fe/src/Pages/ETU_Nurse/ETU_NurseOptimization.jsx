@@ -17,6 +17,7 @@ const ETU_NurseOptimization = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [lastTs, setLastTs] = useState(null);
+  const [etuStatus, setEtuStatus] = useState(null);
 
   // --- FETCH DATA ---
   const fetchOptimization = async (force = false) => {
@@ -44,11 +45,26 @@ const ETU_NurseOptimization = () => {
     }
   };
 
+  const fetchEtuStatus = async () => {
+    try {
+      const res = await fetch('http://localhost:5001/api/ward-status/ETU');
+      if (!res.ok) throw new Error('Failed to fetch ETU status');
+      const json = await res.json();
+      setEtuStatus(json);
+    } catch (e) {
+      console.debug('ETU status fetch failed', e);
+    }
+  };
+
   useEffect(() => {
     fetchOptimization();
+    fetchEtuStatus();
 
     // OPTIONAL: auto-refresh every 60 seconds
-    const id = setInterval(() => fetchOptimization(false), 60000);
+    const id = setInterval(() => {
+      fetchOptimization(false);
+      fetchEtuStatus();
+    }, 60000);
     return () => clearInterval(id);
   }, []);
 
@@ -164,9 +180,7 @@ const ETU_NurseOptimization = () => {
               {data.system_status}
             </span>
 
-            <span className="hidden md:inline-flex px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-100 border border-slate-200 text-slate-600">
-              Solver: {solverStatus}
-            </span>
+            
           </div>
         </div>
 
@@ -246,6 +260,10 @@ const ETU_NurseOptimization = () => {
                 width: `${Math.min(data.occupancy_percentage ?? 0, 100)}%`,
               }}
             ></div>
+          </div>
+          <div className="mt-3 text-sm text-slate-600 font-semibold">
+            ETU Occupied: {etuStatus?.occupied ?? data.current_occupancy ?? 0} / {etuStatus?.capacity ?? data.total_capacity ?? 0}
+            <div className="mt-1">Male: {etuStatus?.male_occupied ?? data.current_etu_male ?? 0} &nbsp;|&nbsp; Female: {etuStatus?.female_occupied ?? data.current_etu_female ?? 0}</div>
           </div>
         </div>
 

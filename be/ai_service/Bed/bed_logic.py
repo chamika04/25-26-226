@@ -362,12 +362,51 @@ def update_bed_status():
 def get_ward_status_api(ward_id):
     key = "ETU_OccupiedBeds" if ward_id == "ETU" else "OccupiedBeds"
     free_space, capacity = get_ward_realtime_free_space(ward_id, key)
-    return jsonify({
+
+    # default payload values
+    occupied_total = max(0, capacity - free_space)
+    male_occupied = 0
+    female_occupied = 0
+
+    # If ETU, try to read latest BedDailyinputs record to get per-gender counts
+    if ward_id == "ETU":
+        try:
+            query = {"$or": [{"Ward_ID": "ETU"}, {"Ward_ID": {"$exists": False}}]}
+            latest = collection.find_one(query, sort=[("_id", -1)])
+            if latest:
+                # defensive parsing (accept strings, floats, None)
+                def to_int_safe(x):
+                    if x is None: return 0
+                    try:
+                        return int(float(x))
+                    except Exception:
+                        return 0
+
+                male_occupied = to_int_safe(latest.get("ETU_OccupiedBeds_Male", 0))
+                female_occupied = to_int_safe(latest.get("ETU_OccupiedBeds_Female", 0))
+
+                # if total stored in record, prefer it
+                tot = latest.get("ETU_OccupiedBeds", None)
+                if tot is not None:
+                    try:
+                        occupied_total = int(float(tot))
+                    except Exception:
+                        pass
+        except Exception as e:
+            print(f"⚠️ Error reading latest ETU record for ward-status: {e}")
+
+    payload = {
         "ward_id": ward_id,
         "capacity": capacity,
         "available": free_space,
-        "occupied": max(0, capacity - free_space),
-    }), 200
+        "occupied": occupied_total,
+    }
+
+    if ward_id == "ETU":
+        payload["male_occupied"] = male_occupied
+        payload["female_occupied"] = female_occupied
+
+    return jsonify(payload), 200
 
 @app.route("/api/get-history", methods=["GET"])
 def get_history():
@@ -558,6 +597,8 @@ def etu_approvals_get():
         return jsonify({'per_ward': per_ward, 'all_approved': all_approved, 'suggested_total': suggested_total, 'raw': docs}), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+    
+    
 
 
 # ==========================================
@@ -756,7 +797,7 @@ def predict():
         "primary_driver": "Weather-Driven Surge" if target_weather == "Rainy" else "Standard Load",
         "timeframe_label": "Next Shift",
         "confidence_score": "92%",
-        "model_used": "Ensemble (TFT gender-split + LSTM total)",
+        "model_used": " TFT + LSTM ",
         "forecast_table_rows": [{
             "period": f"{target_date_obj.strftime('%b %d')} - {display_shift}",
             "prediction_total": predicted_arrivals,

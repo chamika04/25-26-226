@@ -312,7 +312,9 @@ const Ward_A_NurseDashboard = () => {
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
                     <div style={{ background: '#eff6ff', padding: '12px', borderRadius: '12px', border: '1px solid #dbeafe' }}>
                       <p style={{ fontSize: '11px', fontWeight: '700', color: '#3b82f6' }}>WARD AVAILABLE</p>
-                      <p style={{ fontSize: '24px', fontWeight: '800', color: '#1e40af' }}>{wardData.available ?? 0}</p>
+                      <p style={{ fontSize: '24px', fontWeight: '800', color: '#1e40af' }}>
+                        {incomingWardCount ?? wardData.available ?? 0}
+                      </p>
                     </div>
                     <div style={{ background: '#fffbeb', padding: '12px', borderRadius: '12px', border: '1px solid #fef3c7' }}>
                       <p style={{ fontSize: '11px', fontWeight: '700', color: '#d97706' }}>SURGE AREA</p>
