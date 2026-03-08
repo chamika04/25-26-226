@@ -468,6 +468,11 @@ def get_trend_data():
 
         chart_data = list(merged_timeline.values())
         chart_data.sort(key=lambda x: x["sort_key"])
+
+        # Keep only the latest 10 timeline points (most recent)
+        if len(chart_data) > 10:
+            chart_data = chart_data[-10:]
+
         return jsonify(chart_data), 200
 
     except Exception as e:
