@@ -22,16 +22,47 @@ const ETU_NurseTrend = () => {
   useEffect(() => {
     setLoading(true);
 
-    // 1. Fetch Chart Data (Latest 10 Shifts)
+    // 1. Fetch Chart Data (Latest 10 Shifts) and normalize
     fetch('http://localhost:5001/api/get-trend-data')
       .then((res) => res.json())
-      .then((data) => {
-        console.log("Trend Data:", data);
-        setChartData(data);
-        setLoading(false);
+      .then((payload) => {
+        try {
+          if (!Array.isArray(payload)) {
+            console.warn('Unexpected trend payload', payload);
+            setChartData([]);
+            return;
+          }
+
+          const normalized = payload.map((d) => {
+            const observed = d.Observed != null ? Number(d.Observed) : null;
+            let predicted = null;
+            if (d.Predicted != null) predicted = Number(d.Predicted);
+            if (d.PredictedTotal != null) predicted = Number(d.PredictedTotal);
+            if (predicted === null && d.predicted_arrivals != null) predicted = Number(d.predicted_arrivals);
+
+            const male = d.pred_male != null ? Number(d.pred_male) : (d.PredictedMale != null ? Number(d.PredictedMale) : null);
+            const female = d.pred_female != null ? Number(d.pred_female) : (d.PredictedFemale != null ? Number(d.PredictedFemale) : null);
+            if (predicted === null && male != null && female != null) predicted = male + female;
+
+            return {
+              name: d.name || '',
+              Observed: observed,
+              Predicted: predicted,
+              PredictedMale: male,
+              PredictedFemale: female,
+              PredictedTotal: predicted != null ? predicted : (male != null && female != null ? male + female : null),
+            };
+          });
+
+          const final = normalized.length > 10 ? normalized.slice(-10) : normalized;
+          setChartData(final);
+        } finally {
+          setLoading(false);
+        }
       })
       .catch((err) => {
         console.error("Chart Error:", err);
+        setChartData([]);
         setLoading(false);
       });
 
