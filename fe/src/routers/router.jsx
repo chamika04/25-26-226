@@ -6,6 +6,9 @@ import About from "../components/About";
 import MainLayout from "../components/MainLayout";
 import AuthLayout from "../components/AuthLayout"; 
 
+import BookAppointment from "../Pages/Patient/BookAppointment";
+import VisitHospital from "../Pages/Patient/VisitHospital";
+
 import RegReq from "../Pages/Admin/Register_Requests";
 import Login from "../Pages/Login/Username";
 import RegisterForm from "../Pages/Login/Register";
@@ -102,12 +105,16 @@ const router = createBrowserRouter([
     element: <MainLayout />,
     children: [
       { path: "/", element: <Home />},
-      { path: "/about", element: <About/> },
-      { path:"/dashboard_patient", element:<Dashboard_patient/> },
-      { path:"/docAvailability", element:<DocAvailability/> },
-      { path:"/docProfile", element:<DocProfile/> },
-      { path:"/doctors", element:<Doctors/> },  
-
+        { path: "/about", element: <About/> },
+        { path:"/dashboard_patient", element:<Dashboard_patient/> },
+        { path:"/docAvailability", element:<DocAvailability/> },
+        { path:"/docProfile", element:<DocProfile/> },
+        { path:"/doctors", element:<Doctors/> },
+        { path: "/doctors", element: <Doctors /> },
+        { path: "/docAvailability/:doctorId", element: <DocAvailability /> },
+        { path: "/bookAppointment", element: <BookAppointment /> },
+        { path: "/visitHospital", element: <VisitHospital /> }, 
+        
       /*{ path:"/product/:id", element:<SingleProduct/>,
         loader:({params})=>fetch(`http://localhost:5000/product/${params.id}`)
       }*/
