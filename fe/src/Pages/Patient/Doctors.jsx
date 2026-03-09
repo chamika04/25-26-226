@@ -109,8 +109,9 @@ export default function Home() {
               </select>
             </div>
 
+            {/* ✅ FIXED route */}
             <button
-              onClick={() => navigate("/doctor-availability")}
+              onClick={() => navigate("/docAvailability")}
               className="px-5 py-2 rounded-xl bg-blue-700 text-white font-semibold hover:bg-blue-800 transition"
             >
               View Full Availability
@@ -135,12 +136,27 @@ export default function Home() {
                   </p>
                 </div>
 
-                <button
-                  onClick={() => navigate(`/doctor/${doc.id}`)}
-                  className="text-sm px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 transition font-semibold text-slate-700"
-                >
-                  View Profile
-                </button>
+                <div className="flex gap-2">
+                  {/* ✅ NEW: check availability for that doctor (passes state) */}
+                  <button
+                    onClick={() =>
+                      navigate("/docAvailability", {
+                        state: { doctorId: doc.id, doctorName: doc.name },
+                      })
+                    }
+                    className="text-sm px-4 py-2 rounded-xl bg-blue-700 text-white hover:bg-blue-800 transition font-semibold"
+                  >
+                    Check Availability
+                  </button>
+
+                  {/* ✅ FIXED route */}
+                  <button
+                    onClick={() => navigate("/docProfile")}
+                    className="text-sm px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 transition font-semibold text-slate-700"
+                  >
+                    View Profile
+                  </button>
+                </div>
               </div>
 
               {/* Next Days Availability */}
